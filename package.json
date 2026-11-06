@@ -1,0 +1,13 @@
+{
+  "name": "farmacia-2",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Alternativa editoriale indipendente per Farmacia Ponte Dattaro",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs dist 4422",
+    "test:schema": "node scripts/validate-schema.mjs"
+  }
+}
