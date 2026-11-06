@@ -1,18 +1,18 @@
 # Farmacia 2 — Ponte Dattaro
 
-Versione 0.3.0: proposta grafica indipendente, moderna e leggera per Farmacia Ponte Dattaro, Parma.
+Versione 0.4.0: proposta grafica indipendente, visuale e interattiva per Farmacia Ponte Dattaro, Parma.
 
-[Apri l’anteprima](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.3.0)
+[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.4.0)
 
 ## La pagina
 
-- Hero tipografica statica: quartiere Montanara, destinatari, indirizzo e fondazione subito visibili.
-- Quattro servizi con identica struttura e gerarchia: ECG, teledermatologia, Holter pressorio e Holter cardiaco.
-- Tutte le descrizioni e i collegamenti alle schede ufficiali sono visibili senza selettori.
-- Storia, consigli e contatti chiari; barra Chiama/WhatsApp sui dispositivi piccoli.
-- Nessun video, nessun carosello, nessuna dipendenza frontend. Animazioni brevi solo nelle sezioni secondarie, con rispetto del movimento ridotto.
+- Hero tipografica con quartiere, destinatari, indirizzo e storia subito visibili.
+- Video Higgsfield che segue lo scroll nativo, con tre capitoli e pausa manuale.
+- Quattro servizi fotografici equivalenti: ECG, teledermatologia, Holter pressorio e Holter cardiaco. Tutte le descrizioni sono sempre presenti; contatti e schede ufficiali nei dettagli nativi.
+- Nove immagini di contenuto, più poster; galleria touch e tastiera, storia e contatti fotografici.
+- Versioni responsive, caricamento progressivo, un solo font locale e nessuna dipendenza frontend.
 
-La dicitura “1966–2026 · 60 anni a Parma” si riferisce all’anno 2026. La sede in Strada Montanara risale al 1988.
+Il film non intercetta lo scorrimento e non viene riprodotto in loop. Con movimento ridotto, risparmio dati rilevato, errore video o JavaScript disattivato rimane il poster. I contenuti e i contatti restano utilizzabili.
 
 ## Avvio
 
@@ -25,14 +25,14 @@ npm run preview   # http://127.0.0.1:4422/
 npm run test:schema
 ```
 
-La build copia solo nove file: HTML, CSS, JavaScript, robots.txt, marchio del concept, font DM Sans con licenza e immagine secondaria in AVIF/WebP. Circa166 KB complessivi, inclusi entrambi i formati immagine. Nei test locali il primo caricamento ha trasferito circa108 KB; le misure localhost non equivalgono a prestazioni su rete mobile reale.
+La build copia 29 file, circa 2,07 MB complessivi inclusi risoluzioni/formati alternativi. Il video desktop pesa 598 KB, quello mobile 236 KB. Questi pesi non equivalgono al trasferimento di ogni visita: immagini e video hanno versioni dedicate e caricamento progressivo.
 
-I sorgenti sono su `main`; GitHub Pages pubblica il ramo `gh-pages`. Dopo un aggiornamento occorre caricare la build anche su quel ramo. La proposta resta `noindex,nofollow` e separata dal [sito ufficiale della farmacia](https://www.farmaciaparma.it/).
+I sorgenti sono su `main`; GitHub Pages pubblica il ramo `gh-pages`. Dopo un aggiornamento occorre caricare la build anche su quel ramo. Il concept resta `noindex,nofollow` e separato dal [sito ufficiale](https://www.farmaciaparma.it/).
 
 ## Dati e crediti
 
-[Fonti dei dati e dei servizi](DATA-SOURCES.md). Il JSON-LD contiene solo dati confermati, senza orari dedotti, prezzi o recensioni.
+[Fonti dei dati e dei servizi](DATA-SOURCES.md). Il sessantesimo “1966–2026 · 60 anni a Parma” si riferisce al 2026; la sede attuale risale al 1988.
 
-DM Sans è distribuito sotto SIL Open Font License1.1, conservata in `assets/fonts/`. Il piccolo marchio è parte del concept, non un logo ufficiale. L’unica immagine è una ricostruzione illustrativa IA già disponibile per il progetto: non è una fotografia autentica della farmacia. Il prototipo non raccoglie dati e non conferma prenotazioni; i contatti aprono i canali reali.
+DM Sans è distribuito sotto SIL Open Font License 1.1, conservata in `assets/fonts/`. Il piccolo marchio è parte del concept, non un logo ufficiale. Le immagini sono ricostruzioni illustrative IA già disponibili per il progetto; il video è stato generato con Higgsfield Seedance 2.5 e ottimizzato per lo scroll. Non sono riprese autentiche della farmacia o del personale. La scena in bianco e nero non è una foto d’archivio.
 
-I materiali non costituiscono un pacchetto di asset per altri clienti e questo repository non concede diritti di riutilizzo del concept. Le versioni precedenti rimangono nella cronologia Git.
+Il prototipo non raccoglie dati e non conferma prenotazioni; i contatti aprono i canali reali. I materiali non costituiscono un pacchetto di asset per altri clienti e questo repository non concede diritti di riutilizzo del concept. Le versioni precedenti rimangono nella cronologia Git.
