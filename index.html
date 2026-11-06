@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="farmacia2-version" content="0.5.0">
+  <meta name="farmacia2-version" content="0.6.0">
   <title>Farmacia Ponte Dattaro — Parma, quartiere Montanara</title>
   <meta name="description" content="Farmacia Ponte Dattaro, a Parma dal 1966. ECG, teledermatologia e Holter in Strada Montanara 23/b, nel quartiere Montanara. Servizi e contatti.">
   <meta name="robots" content="noindex,nofollow">
@@ -12,9 +12,9 @@
   <link rel="preload" href="./assets/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" as="image" type="image/avif" href="./assets/motion/hero-mobile.avif" media="(max-width: 820px)" fetchpriority="high">
   <link rel="preload" as="image" type="image/avif" href="./assets/motion/hero-desktop.avif" media="(min-width: 821px)" fetchpriority="high">
-  <link rel="stylesheet" href="./styles.css?v=0.5.0">
+  <link rel="stylesheet" href="./styles.css?v=0.6.0">
   <script type="application/ld+json">
-  {
+    {
     "@context": "https://schema.org",
     "@type": "Pharmacy",
     "@id": "https://www.farmaciaparma.it/#farmacia",
@@ -31,10 +31,65 @@
       "addressRegion": "PR",
       "addressCountry": "IT"
     },
-    "foundingDate": "1966"
+    "foundingDate": "1966",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "I servizi in farmacia",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Elettrocardiogramma",
+            "description": "Registra l’attività elettrica del cuore con elettrodi applicati sulla pelle.",
+            "url": "https://www.farmaciaparma.it/servizi/138-ecg.html",
+            "provider": {
+              "@id": "https://www.farmaciaparma.it/#farmacia"
+            }
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Teledermatologia",
+            "description": "In farmacia puoi chiedere una valutazione a distanza per un problema della pelle.",
+            "url": "https://farmaciaparma.it/servizi/134-teledermatologia.html",
+            "provider": {
+              "@id": "https://www.farmaciaparma.it/#farmacia"
+            }
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Holter pressorio",
+            "description": "Misura la pressione arteriosa a intervalli durante le normali attività quotidiane.",
+            "url": "https://www.farmaciaparma.it/servizi/133-holter-pressorio.html",
+            "provider": {
+              "@id": "https://www.farmaciaparma.it/#farmacia"
+            }
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Holter cardiaco",
+            "description": "Registra il ritmo del cuore mentre svolgi le attività di ogni giorno.",
+            "url": "https://www.farmaciaparma.it/servizi/132-holter-cardiaco-o-ecg-dinamico.html",
+            "provider": {
+              "@id": "https://www.farmaciaparma.it/#farmacia"
+            }
+          }
+        }
+      ]
+    }
   }
+  
   </script>
-  <script src="./app.js?v=0.5.0" defer></script>
+  <script src="./app.js?v=0.6.0" defer></script>
 </head>
 <body>
   <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs>
@@ -84,6 +139,7 @@
 
     <section class="services shell section-space" id="servizi" aria-labelledby="services-title">
       <div class="section-heading visual-reveal"><div><p class="eyebrow">01 / I servizi in farmacia</p><h2 id="services-title">Quattro servizi.<br><span>Un posto vicino.</span></h2></div><div class="section-intro"><p>Cuore, pressione, pelle. Scopri il servizio e parla con la farmacia per modalità e disponibilità.</p><span class="small-note">Scopri il servizio. Chiedi alla farmacia.</span></div></div>
+      <div class="visual-motion-controls"><p><span class="visual-motion-dot" aria-hidden="true"></span><span data-visual-motion-status>Fotografie illustrative IA</span></p><button type="button" data-visual-motion-toggle hidden aria-pressed="false">Ferma le immagini</button></div>
       <div class="service-grid"><article class="service-card visual-reveal" id="ecg" aria-labelledby="ecg-title">
         <a class="service-image" href="https://www.farmaciaparma.it/servizi/138-ecg.html" target="_blank" rel="noopener noreferrer" aria-label="Scheda ufficiale Elettrocardiogramma, si apre in una nuova scheda"><picture><source type="image/avif" srcset="./assets/images/ecg-640.avif 640w, ./assets/images/ecg-960.avif 960w" sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 820px) calc((100vw - 68px)/2), (max-width: 1510px) calc((100vw - 8.8vw - 24px)/2), 668px"><img src="./assets/images/ecg-640.webp" srcset="./assets/images/ecg-640.webp 640w, ./assets/images/ecg-960.webp 960w" sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 820px) calc((100vw - 68px)/2), (max-width: 1510px) calc((100vw - 8.8vw - 24px)/2), 668px" width="960" height="536" alt="Una visita per ECG, scena illustrativa IA." loading="lazy" decoding="async"></picture><span class="image-label">01 / Cuore</span><span class="image-indicator" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span></a>
         <div class="service-body"><div class="service-title"><h3 id="ecg-title">Elettrocardiogramma</h3><span class="service-acronym">ECG</span></div><p class="service-description">Registra l’attività elettrica del cuore con elettrodi applicati sulla pelle.</p>
@@ -107,6 +163,7 @@
     <section class="about section-space" id="farmacia" aria-labelledby="about-title">
       <div class="shell about-heading visual-reveal"><div><p class="eyebrow">02 / Le persone, il quartiere</p><h2 id="about-title">La cura parte<br><span>dall’ascolto.</span></h2></div><div class="about-copy"><p>Siamo a Parma dal <strong>1966</strong>. In Strada Montanara dal <strong>1988</strong>. Una presenza quotidiana per chi vive il quartiere e per chi lo attraversa.</p><p>Per un consiglio, un servizio o i prodotti di ogni giorno. Anche una domanda è un buon inizio.</p></div></div>
       <div class="gallery-heading shell"><p>Piccoli gesti. Tante attenzioni.</p><div class="gallery-controls"><span class="gallery-counter" aria-label="Immagini visibili e totale"><span data-gallery-current>01</span><span aria-hidden="true"> / </span><span data-gallery-total>04</span></span><button type="button" data-gallery-prev aria-label="Immagini precedenti" aria-controls="gallery" hidden><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button><button type="button" data-gallery-next aria-label="Immagini successive" aria-controls="gallery" hidden><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button></div></div>
+      <div class="shell gallery-motion"><div class="visual-motion-controls"><p><span class="visual-motion-dot" aria-hidden="true"></span><span data-visual-motion-status>Fotografie illustrative IA</span></p><button type="button" data-visual-motion-toggle hidden aria-pressed="false">Ferma le immagini</button></div></div>
       <div class="visual-gallery" id="gallery" data-gallery role="region" aria-label="Immagini illustrative della vita in farmacia" tabindex="0">
         <figure class="gallery-card"><div class="gallery-image"><picture><source type="image/avif" srcset="./assets/images/interno-mobile.avif"><img src="./assets/images/interno-mobile.webp" alt="Un’idea di accoglienza in farmacia, immagine illustrativa IA." width="800" height="447" loading="lazy" decoding="async"></picture></div><figcaption><span>01 / Accoglienza</span><strong>Il tempo per ascoltare.</strong></figcaption></figure>
         <figure class="gallery-card"><div class="gallery-image"><picture><source type="image/avif" srcset="./assets/images/prodotti-640.avif 640w, ./assets/images/prodotti-960.avif 960w" sizes="(max-width: 600px) 82vw, (max-width: 820px) 48vw, min(37vw, 500px)"><img src="./assets/images/prodotti-640.webp" srcset="./assets/images/prodotti-640.webp 640w, ./assets/images/prodotti-960.webp 960w" sizes="(max-width: 600px) 82vw, (max-width: 820px) 48vw, min(37vw, 500px)" width="960" height="638" alt="Prodotti per la cura quotidiana, immagine illustrativa IA." loading="lazy" decoding="async"></picture></div><figcaption><span>02 / Quotidianità</span><strong>Un consiglio, ogni giorno.</strong></figcaption></figure>

@@ -436,3 +436,137 @@ if ('IntersectionObserver' in window) {
 document.fonts?.ready.then(invalidateLayout);
 window.addEventListener('load', invalidateLayout, { once: true });
 invalidateLayout();
+
+// Every content photograph receives its own slow camera movement. This does
+// not request another image or movie, and only visible photographs animate.
+// Keep these instances separate from the short reveal/details animations.
+const ambientImages = [...new Set(document.querySelectorAll(
+  '.service-image img, .gallery-image img, .contact-image img, [data-ambient-image]'
+))].filter(node => node instanceof HTMLImageElement);
+const visualToggles = [...document.querySelectorAll('[data-visual-motion-toggle]')];
+const visualStatuses = [...document.querySelectorAll('[data-visual-motion-status]')];
+const ambientEntries = ambientImages.map((image, index) => ({
+  image,
+  index,
+  visible: false,
+  animation: null,
+  link: image.closest('a')
+}));
+let visualPaused = false;
+let visualPageActive = true;
+let pointerImage = null;
+let visualState = '';
+const ambientSupported = 'IntersectionObserver' in window && typeof Element.prototype.animate === 'function';
+
+const setVisualState = state => {
+  if (state === visualState) return;
+  visualState = state;
+  root.dataset.visualMotionState = state;
+  const disabled = ['reduced', 'saving', 'unsupported'].includes(state);
+  const label = state === 'reduced' ? 'Animazioni ridotte'
+    : state === 'saving' ? 'Risparmio dati'
+    : state === 'unsupported' ? 'Immagini fisse'
+    : visualPaused ? 'Anima le immagini' : 'Ferma le immagini';
+  const explanation = state === 'reduced' ? 'Immagini fisse: movimento ridotto attivo.'
+    : state === 'saving' ? 'Immagini fisse: risparmio dati attivo.'
+    : state === 'unsupported' ? 'Immagini fisse in questo browser.'
+    : visualPaused ? 'Movimento delle immagini in pausa.' : 'Immagini in movimento';
+  visualToggles.forEach(button => {
+    button.disabled = disabled;
+    button.textContent = label;
+    button.setAttribute('aria-pressed', String(visualPaused || disabled));
+    button.setAttribute('title', explanation);
+  });
+  visualStatuses.forEach(node => { node.textContent = explanation; });
+};
+
+const createAmbientAnimation = entry => {
+  const horizontal = entry.index % 2 ? -1 : 1;
+  const vertical = entry.index % 3 ? 1 : -1;
+  const animation = entry.image.animate([
+    { transform: `translate3d(${-.8 * horizontal}%, ${-.4 * vertical}%, 0) scale(1.025)` },
+    { transform: `translate3d(${.8 * horizontal}%, ${.4 * vertical}%, 0) scale(1.085)` }
+  ], {
+    duration: 9000 + entry.index % 3 * 1500,
+    easing: 'ease-in-out',
+    iterations: Infinity,
+    direction: 'alternate',
+    fill: 'both'
+  });
+  // The synchronization below decides when to run, including the first frame.
+  animation.pause();
+  return animation;
+};
+
+const syncAmbientImages = () => {
+  const reset = !ambientSupported || !allowed();
+  setVisualState(!ambientSupported ? 'unsupported' : preference.matches ? 'reduced'
+    : savingData() ? 'saving' : visualPaused ? 'paused' : 'running');
+  for (const entry of ambientEntries) {
+    if (reset) {
+      entry.animation?.cancel();
+      entry.animation = null;
+      entry.image.dataset.ambientState = 'static';
+      continue;
+    }
+    const focused = entry.link?.contains(document.activeElement);
+    const shouldRun = entry.visible && visualPageActive && !document.hidden
+      && !visualPaused && !focused && pointerImage !== entry.image
+      && entry.image.complete && entry.image.naturalWidth > 0;
+    if (shouldRun) {
+      entry.animation ||= createAmbientAnimation(entry);
+      if (entry.animation.playState !== 'running') entry.animation.play();
+      entry.image.dataset.ambientState = 'running';
+    } else {
+      entry.animation?.pause();
+      entry.image.dataset.ambientState = entry.animation ? 'paused' : 'idle';
+    }
+  }
+};
+
+ambientEntries.forEach(entry => {
+  entry.image.classList.add('ambient-image');
+  entry.image.dataset.ambientState = 'idle';
+  entry.image.addEventListener('load', syncAmbientImages);
+});
+visualToggles.forEach(button => {
+  button.hidden = false;
+  button.addEventListener('click', () => {
+    if (!ambientSupported || !allowed()) return;
+    visualPaused = !visualPaused;
+    syncAmbientImages();
+  });
+});
+if (ambientSupported) {
+  const ambientObserver = new IntersectionObserver(entries => {
+    entries.forEach(observation => {
+      const entry = ambientEntries.find(item => item.image === observation.target);
+      if (entry) entry.visible = observation.isIntersecting && observation.intersectionRatio >= .1;
+    });
+    syncAmbientImages();
+  }, { threshold: [0, .1] });
+  ambientEntries.forEach(({ image }) => ambientObserver.observe(image));
+}
+document.addEventListener('focusin', syncAmbientImages);
+document.addEventListener('focusout', () => queueMicrotask(syncAmbientImages));
+document.addEventListener('pointerdown', event => {
+  if (!(event.target instanceof Element)) return;
+  pointerImage = event.target.closest('.service-image, .gallery-image, .contact-image')?.querySelector('img') || null;
+  if (pointerImage) syncAmbientImages();
+}, { passive: true });
+const releaseImagePointer = () => { pointerImage = null; syncAmbientImages(); };
+document.addEventListener('pointerup', releaseImagePointer, { passive: true });
+document.addEventListener('pointercancel', releaseImagePointer, { passive: true });
+preference.addEventListener('change', syncAmbientImages);
+connection?.addEventListener?.('change', syncAmbientImages);
+document.addEventListener('visibilitychange', syncAmbientImages);
+window.addEventListener('pagehide', () => {
+  visualPageActive = false;
+  ambientEntries.forEach(entry => {
+    entry.animation?.cancel();
+    entry.animation = null;
+    entry.image.dataset.ambientState = 'idle';
+  });
+});
+window.addEventListener('pageshow', () => { visualPageActive = true; syncAmbientImages(); });
+syncAmbientImages();

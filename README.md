@@ -1,19 +1,22 @@
 # Farmacia 2 — Ponte Dattaro
 
-Versione 0.5.0: proposta grafica indipendente, visuale e interattiva per Farmacia Ponte Dattaro, Parma.
+Versione 0.6.0: proposta grafica indipendente per Farmacia Ponte Dattaro, Parma.
 
-[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.5.0)
+[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.6.0)
 
-## La pagina
+## Immagini e interazioni
 
-- Hero desktop integrata: messaggio, indirizzo e storia accanto al film Higgsfield, subito visibile.
-- Video guidato dallo scroll nativo, con tre capitoli e pausa; layout compatto sui display bassi e con testo ingrandito.
-- Quattro servizi fotografici equivalenti: ECG, teledermatologia, Holter pressorio e Holter cardiaco. Tutte le descrizioni restano presenti; schede ufficiali e contatti WhatsApp specifici nei dettagli nativi.
-- Accessi diretti ai servizi da tablet/desktop; apertura essenziale e CTA principale su telefono.
-- Galleria touch e tastiera con scorrimento di una scheda, contatore visibile, Home/End e cambi rapidi.
-- Domande pratiche su accesso, indirizzo, orari da verificare e contatti; nessun dato clinico o tariffa inventato.
+Tutte le nove fotografie di contenuto hanno un movimento leggero di camera (pan e zoom), visibile senza hover. Il movimento si attiva soltanto sulle foto in vista. Due comandi sincronizzati permettono di fermare o riavviare le immagini. Focus, tocco, uscita dalla viewport e scheda nascosta sospendono il movimento; reduced-motion e risparmio dati lo disattivano. Nessun nuovo file immagine o video richiesto per animare le foto.
 
-Il film non intercetta lo scroll e non viene riprodotto in loop. Con movimento ridotto, risparmio dati rilevato, errore video o JavaScript disattivato resta il poster. I controlli del film rimangono raggiungibili anche in orizzontale e al200%. I contenuti essenziali non dipendono dalle animazioni.
+Restano il video Higgsfield guidato dallo scroll, la hero integrata, i quattro servizi fotografici equivalenti, i contatti specifici, le FAQ e la galleria touch/tastiera. AVIF preferiti con WebP di fallback, immagini secondarie lazy, un solo font locale e nessuna dipendenza frontend.
+
+Video e fotografie sono scene illustrative IA, non riprese autentiche degli ambienti o del personale. La scena in bianco e nero non è una fotografia d’archivio.
+
+## Dati strutturati
+
+Il JSON-LD Pharmacy conserva esclusivamente i dati confermati e aggiunge hasOfferCatalog con quattro Service: ECG, teledermatologia, Holter pressorio e Holter cardiaco. Nomi, descrizioni, provider e URL ufficiali corrispondono alle schede visibili.
+
+Il validatore controlla anche i collegamenti dei contatti e i messaggi WhatsApp specifici. Nessun prezzo, disponibilità, orario, rating, foto IA o logo del concept aggiunto al markup. Non viene aggiunto FAQPage. Il concept resta noindex,nofollow e separato dal sito ufficiale.
 
 ## Avvio
 
@@ -26,16 +29,12 @@ npm run preview   # http://127.0.0.1:4422/
 npm run test:schema
 ```
 
-La build contiene47file, inclusi i formati e le risoluzioni alternativi. Diciotto nuove varianti AVIF pesano519.846byte contro1.041.600byte dei WebP equivalenti (circa−50% sul confronto fra asset). I WebP rimangono come fallback; i file alternativi non vengono scaricati tutti dalla stessa visita. Poster responsive precaricati, immagini secondarie lazy, un solo font locale e nessuna dipendenza frontend.
+La build contiene 47 file, inclusi formati e risoluzioni alternativi. La somma della confezione non equivale al trasferimento di ogni visita. I sorgenti sono su main; GitHub Pages pubblica gh-pages. Aggiornare main da solo non pubblica la nuova build.
 
-La geometria dello scroll viene memorizzata e aggiornata quando cambia il layout. Non c’è un ciclo continuo di rendering. Il video desktop pesa598KB, quello mobile236KB.
+## Fonti e crediti
 
-I sorgenti sono su `main`; GitHub Pages pubblica `gh-pages`. Dopo un aggiornamento occorre caricare la build anche su quel ramo. Il concept resta `noindex,nofollow` e separato dal [sito ufficiale](https://www.farmaciaparma.it/).
+[Fonti dei dati e dei servizi](DATA-SOURCES.md). “1966–2026 ·60 anni a Parma” si riferisce al2026; la sede attuale risale al1988.
 
-## Dati e crediti
-
-[Fonti dei dati e dei servizi](DATA-SOURCES.md). “1966–2026 ·60anni a Parma” si riferisce al2026; la sede attuale risale al1988.
-
-DM Sans è distribuito sotto SIL Open Font License1.1, conservata in `assets/fonts/`. Il piccolo marchio è parte del concept, non un logo ufficiale. Le immagini sono ricostruzioni illustrative IA già disponibili per il progetto; il video è stato generato con Higgsfield Seedance2.5 e ottimizzato per lo scroll. Non sono riprese autentiche della farmacia o del personale. La scena in bianco e nero non è una fotografia d’archivio.
+DM Sans usa SIL Open Font License1.1, conservata in assets/fonts/. Il piccolo marchio è parte del concept, non un logo ufficiale. Il film è generato con Higgsfield Seedance2.5; l’animazione delle fotografie viene eseguita nel browser con Web Animations API.
 
 Il prototipo non raccoglie dati e non conferma prenotazioni; i contatti aprono i canali reali. I materiali non costituiscono un pacchetto di asset per altri clienti e questo repository non concede diritti di riutilizzo del concept. Le versioni precedenti rimangono nella cronologia Git.
