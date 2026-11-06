@@ -1,16 +1,20 @@
-# Dati e contenuti
+# Dati e servizi
 
-Dati confermati per questa proposta grafica e verificati il 5 novembre 2026:
+Confermati nelle fonti ufficiali, rilette il 6 novembre 2026:
 
-- Nome: Farmacia Ponte Dattaro.
-- Indirizzo: Strada Montanara, 23/b — 43124 Parma (PR), Italia.
-- Telefono: +39 0521 964011.
-- Email: pontedattarofarmacia@gmail.com.
-- P. IVA: 02072810340, rappresentata come `IT02072810340` nel JSON-LD.
-- Fondazione: 1966; sede attuale dal 1988; guida del dott. Enrico Bruschi dal marzo 1999.
+- Farmacia Ponte Dattaro, Strada Montanara23/b,43124 Parma(PR), Italia.
+- Telefono+39 0521 964011, email pontedattarofarmacia@gmail.com, P.IVA02072810340.
+- Apertura nel1966; sede attuale dal1988; guida del dott.Enrico Bruschi dal marzo1999.
 
-Fonti ufficiali: [Dove siamo](https://www.farmaciaparma.it/dove-siamo.html), [Chi siamo](https://www.farmaciaparma.it/chisiam2.html) e footer del [sito della farmacia](https://www.farmaciaparma.it/).
+Fonti: [Dove siamo](https://www.farmaciaparma.it/dove-siamo.html), [Chi siamo](https://www.farmaciaparma.it/chisiam2.html) e footer del [sito della farmacia](https://www.farmaciaparma.it/).
 
-Il JSON-LD usa `Pharmacy` e identifica l’ente reale sul dominio ufficiale. Non attribuisce alla farmacia la pubblicazione di questa proposta. Sono esclusi orari non confermati, prezzi, coordinate dedotte, recensioni, personale illustrativo e immagini IA. I collegamenti ai servizi portano ai canali reali, senza prenotazioni automatiche.
+## Le quattro schede
 
-Il controllo locale non sostituisce Google Rich Results Test o Schema.org Validator interattivo e non garantisce risultati avanzati. La proposta resta intenzionalmente non indicizzabile.
+- [Elettrocardiogramma](https://www.farmaciaparma.it/servizi/138-ecg.html): registrazione dell’attività elettrica cardiaca.
+- [Teledermatologia](https://farmaciaparma.it/servizi/134-teledermatologia.html): valutazione della pelle a distanza, tramite la farmacia.
+- [Holter pressorio](https://www.farmaciaparma.it/servizi/133-holter-pressorio.html): misurazioni della pressione durante le attività quotidiane.
+- [Holter cardiaco](https://www.farmaciaparma.it/servizi/132-holter-cardiaco-o-ecg-dinamico.html): registrazione prolungata del ritmo cardiaco.
+
+La pagina non aggiunge indicazioni su idoneità clinica, preparazione, durata, prezzi o disponibilità. Per modalità e tariffe rinvia alla farmacia e alle schede ufficiali.
+
+Il JSON-LD Pharmacy identifica l’ente reale sul dominio ufficiale, senza attribuirgli la pubblicazione del concept. Restano esclusi orari non confermati, coordinate dedotte, valutazioni, personale illustrativo e immagini IA. Il controllo locale non sostituisce i validatori interattivi e non garantisce risultati avanzati. La proposta resta non indicizzabile.
