@@ -31,10 +31,10 @@ const files = [
   'assets/images/storia-960.webp',
   'assets/images/facciata-640.webp',
   'assets/images/facciata-960.webp',
-  'assets/motion/hero-desktop.webp',
-  'assets/motion/hero-mobile.webp',
-  'assets/motion/hero-scroll-desktop.mp4',
-  'assets/motion/hero-scroll-mobile.mp4',
+  'assets/motion/interior-desktop.webp',
+  'assets/motion/interior-mobile.webp',
+  'assets/motion/interior-desktop.mp4',
+  'assets/motion/interior-mobile.mp4',
   'assets/images/ecg-640.avif',
   'assets/images/ecg-960.avif',
   'assets/images/pelle-640.avif',
@@ -51,8 +51,8 @@ const files = [
   'assets/images/storia-960.avif',
   'assets/images/facciata-640.avif',
   'assets/images/facciata-960.avif',
-  'assets/motion/hero-desktop.avif',
-  'assets/motion/hero-mobile.avif',
+  'assets/motion/interior-desktop.avif',
+  'assets/motion/interior-mobile.avif',
 ];
 
 const html = await readFile(path.join(root, 'index.html'), 'utf8');
