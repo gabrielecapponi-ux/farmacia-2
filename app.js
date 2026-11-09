@@ -1,3 +1,4 @@
+import { initHistory } from './history.js?v=0.8.0';
 const root = document.documentElement;
 const preference = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 820px)');
@@ -7,6 +8,7 @@ const clamp = value => Math.min(1, Math.max(0, value));
 const header = document.querySelector('.site-header');
 const dock = document.querySelector('.mobile-contact-dock');
 root.classList.add('has-js');
+const historyMotion = initHistory({ reducedMotion: preference, connection });
 
 // Ordinary links and immediate menu state remain usable during any animation.
 const menu = document.querySelector('.menu-toggle');
@@ -75,6 +77,9 @@ if ('IntersectionObserver' in window) {
 
 const stage = document.querySelector('[data-film-stage]');
 const video = document.querySelector('[data-hero-video]');
+const camera = document.querySelector('.entry-camera');
+const entryCopy = document.querySelector('.entry-copy');
+const progressBar = document.querySelector('.entry-progress > span');
 const toggle = document.querySelector('[data-motion-toggle]');
 const status = document.querySelector('[data-film-status]');
 const navItems = [...document.querySelectorAll('.site-nav a[href^="#"]')]
@@ -87,33 +92,119 @@ let layoutDirty = true;
 let navStops = [];
 let headerHeight = 0;
 let currentNav = null;
+let compact = true;
+let nearFilm = false;
+let manualPaused = false;
+let failed = false;
+let filmPageActive = true;
+let currentSource = '';
+let filmState = '';
+let desiredTime = 0;
+let displayedProgress = 0;
+let entryBounds = { top: 0, bottom: 0, range: 1 };
 const savingData = () => Boolean(connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || ''));
 const allowed = () => !preference.matches && !savingData();
+const canScrub = () => allowed() && !compact && !failed && filmPageActive && !document.hidden;
 const setPixelProperty = (element, name, value) => {
   const next = `${Math.ceil(value)}px`;
   if (element.style.getPropertyValue(name) !== next) element.style.setProperty(name, next);
 };
 const scheduleNavigation = () => { if (!frame) frame = requestAnimationFrame(updateNavigation); };
 const invalidateLayout = () => { layoutDirty = true; scheduleNavigation(); };
-
-// Page scrolling updates navigation only. The interior video uses ordinary
-// native playback at 1x; its very slow camera is encoded in the media itself.
+const setFilmState = next => {
+  if (!stage || next === filmState) return;
+  filmState = next;
+  stage.dataset.filmState = next;
+  if (status) status.textContent = {
+    idle: 'Scorri per entrare nella farmacia.', loading: 'L’interno si sta preparando.',
+    scrubbing: 'L’interno segue lo scorrimento.', paused: 'Movimento dell’interno in pausa.',
+    compact: 'Interno illustrativo, immagine fissa.', reduced: 'Movimento ridotto: immagine fissa.',
+    saving: 'Risparmio dati: immagine fissa.', error: 'Video non disponibile: immagine fissa.'
+  }[next];
+  if (toggle) {
+    toggle.disabled = ['reduced', 'saving', 'error', 'compact'].includes(next);
+    toggle.setAttribute('aria-pressed', String(manualPaused || toggle.disabled));
+    toggle.textContent = next === 'reduced' ? 'Movimento ridotto'
+      : next === 'saving' ? 'Risparmio dati' : ['error', 'compact'].includes(next) ? 'Immagine fissa'
+      : manualPaused ? 'Riprendi il movimento' : 'Ferma il movimento';
+  }
+};
+function unloadFilm() {
+  video?.pause();
+  if (video?.hasAttribute('src')) {
+    video.removeAttribute('src');
+    currentSource = '';
+    video.load();
+  }
+  stage?.classList.remove('is-film-ready');
+}
+function loadFilm() {
+  if (!video || !nearFilm || !canScrub()) return;
+  const source = mobile.matches ? video.dataset.srcMobile : video.dataset.srcDesktop;
+  if (!source || source === currentSource) return;
+  video.pause();
+  stage.classList.remove('is-film-ready');
+  currentSource = source;
+  video.muted = true;
+  video.playsInline = true;
+  video.loop = false;
+  video.preload = 'auto';
+  video.src = source;
+  setFilmState('loading');
+  video.load();
+}
+// Only one decoded seek may be in flight. Each completion consumes the latest
+// requested scroll position, so rapid gestures never create a seek queue.
+function flushSeek() {
+  if (!video || !canScrub() || manualPaused || !currentSource || video.readyState < 1 || video.seeking) return;
+  if (Math.abs(video.currentTime - desiredTime) > 1 / 48) video.currentTime = desiredTime;
+}
 function measureLayout() {
   layoutDirty = false;
   headerHeight = header?.getBoundingClientRect().height || 0;
   setPixelProperty(root, '--header-space', headerHeight);
   setPixelProperty(root, '--dock-space', dock?.getBoundingClientRect().height || 0);
+  if (stage && entryCopy) {
+    const vh = window.innerHeight;
+    const style = getComputedStyle(entryCopy);
+    const contentHeight = entryCopy.getBoundingClientRect().height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+    const nextCompact = !allowed() || failed || !('IntersectionObserver' in window)
+      || vh < 650 || headerHeight + contentHeight + 235 > vh;
+    const changed = nextCompact !== compact;
+    compact = nextCompact;
+    stage.classList.toggle('is-entry-scroll', !compact);
+    stage.classList.toggle('is-entry-compact', compact);
+    if (changed && compact) { unloadFilm(); if (camera) camera.style.transform = ''; }
+    const box = stage.getBoundingClientRect();
+    entryBounds = { top: window.scrollY + box.top, bottom: window.scrollY + box.bottom, range: Math.max(1, box.height - vh) };
+  }
   navStops = navItems.map(item => ({ ...item, top: window.scrollY + item.section.getBoundingClientRect().top }));
   galleryMeasurements.forEach(measure => measure());
+}
+function syncFilm() {
+  if (!stage || !video) return;
+  if (preference.matches) { setFilmState('reduced'); return; }
+  if (savingData()) { setFilmState('saving'); return; }
+  if (failed) { setFilmState('error'); return; }
+  if (compact) { setFilmState('compact'); return; }
+  loadFilm();
+  const scrollProgress = clamp((window.scrollY - entryBounds.top) / entryBounds.range);
+  stage.dataset.scrollProgress = scrollProgress.toFixed(4);
+  if (!manualPaused && filmPageActive && !document.hidden) displayedProgress = scrollProgress;
+  stage.dataset.progress = displayedProgress.toFixed(4);
+  if (camera) camera.style.transform = `scale(${(1 + displayedProgress * .42).toFixed(4)})`;
+  if (progressBar) progressBar.style.transform = `scaleX(${displayedProgress})`;
+  if (Number.isFinite(video.duration)) desiredTime = displayedProgress * Math.max(0, video.duration - .05);
+  flushSeek();
+  setFilmState(manualPaused ? 'paused' : video.readyState >= 2 ? 'scrubbing' : currentSource ? 'loading' : 'idle');
 }
 function updateNavigation() {
   frame = 0;
   if (layoutDirty) measureLayout();
   const position = window.scrollY;
+  header?.classList.toggle('is-paper', position + headerHeight >= entryBounds.bottom - 4);
   let active = null;
-  for (const item of navStops) {
-    if (item.top <= position + headerHeight + 100) active = item;
-  }
+  for (const item of navStops) if (item.top <= position + headerHeight + 100) active = item;
   if (active?.link !== currentNav) {
     currentNav = active?.link || null;
     navItems.forEach(({ link }) => {
@@ -121,125 +212,7 @@ function updateNavigation() {
       else link.removeAttribute('aria-current');
     });
   }
-}
-
-let nearFilm = false;
-let inFilm = false;
-let manualPaused = false;
-let filmEnded = false;
-let playBlocked = false;
-let failed = false;
-let filmPageActive = true;
-let filmState = '';
-let currentSource = '';
-let pendingFraction = null;
-let sourceSerial = 0;
-let playRequest = 0;
-let playPending = false;
-const setFilmState = next => {
-  if (!stage || next === filmState) return;
-  filmState = next;
-  stage.dataset.filmState = next;
-  if (status) status.textContent = {
-    idle: 'Uno sguardo lento all’interno',
-    loading: 'Il video si sta preparando',
-    ready: 'Uno sguardo lento all’interno',
-    playing: 'Uno sguardo lento all’interno',
-    paused: 'Video in pausa',
-    ended: 'Puoi rivedere l’interno',
-    blocked: 'Premi per avviare il video',
-    reduced: 'Movimento ridotto: immagine fissa',
-    saving: 'Risparmio dati: immagine fissa',
-    error: 'Video non disponibile: immagine fissa'
-  }[next];
-  if (toggle) {
-    const disabled = ['reduced', 'saving', 'error'].includes(next);
-    toggle.disabled = disabled;
-    toggle.setAttribute('aria-pressed', String(next === 'paused' || disabled));
-    toggle.textContent = next === 'reduced' ? 'Movimento ridotto'
-      : next === 'saving' ? 'Risparmio dati'
-      : next === 'error' ? 'Immagine fissa'
-      : next === 'ended' ? 'Rivedi il video'
-      : ['idle', 'ready', 'blocked'].includes(next) ? 'Avvia il video'
-      : next === 'paused' ? 'Riprendi il video' : 'Ferma il video';
-  }
-};
-const pauseFilm = () => {
-  playRequest += 1;
-  playPending = false;
-  video?.pause();
-};
-const canPlayFilm = () => allowed() && !failed && !manualPaused && !filmEnded
-  && !playBlocked && filmPageActive && !document.hidden && inFilm;
-const playFilm = () => {
-  if (!video || !currentSource || !canPlayFilm() || video.readyState < 2 || playPending) return;
-  if (!video.paused) {
-    stage?.classList.add('is-film-ready');
-    setFilmState('playing');
-    return;
-  }
-  const request = ++playRequest;
-  const serial = sourceSerial;
-  playPending = true;
-  Promise.resolve(video.play()).then(() => {
-    if (request !== playRequest || serial !== sourceSerial) return;
-    playPending = false;
-    if (!canPlayFilm()) { pauseFilm(); syncFilm(); return; }
-    stage?.classList.add('is-film-ready');
-    setFilmState('playing');
-  }).catch(error => {
-    if (request !== playRequest || serial !== sourceSerial) return;
-    playPending = false;
-    if (!allowed() || manualPaused || document.hidden || !filmPageActive || !inFilm) { syncFilm(); return; }
-    // A browser may decline autoplay. Keep the poster and an ordinary play
-    // button; this is not a media error or a reason for automatic retries.
-    if (error?.name === 'AbortError' && video.seeking) return;
-    playBlocked = true;
-    stage?.classList.remove('is-film-ready');
-    setFilmState('blocked');
-  });
-};
-function syncFilm() {
-  if (!video || !stage || !allowed()) return;
-  if (failed) { pauseFilm(); setFilmState('error'); return; }
-  if (!currentSource) { setFilmState('idle'); loadFilm(); return; }
-  if (filmEnded || video.ended) {
-    filmEnded = true;
-    pauseFilm();
-    if (video.readyState >= 2) stage.classList.add('is-film-ready');
-    setFilmState('ended');
-    return;
-  }
-  if (manualPaused || !inFilm || document.hidden || !filmPageActive) {
-    pauseFilm();
-    setFilmState(manualPaused || video.readyState >= 2 ? 'paused' : 'loading');
-    return;
-  }
-  if (playBlocked) { setFilmState('blocked'); return; }
-  if (video.readyState < 2 || video.seeking) { setFilmState('loading'); return; }
-  playFilm();
-}
-function loadFilm() {
-  if (!video || !stage || !allowed() || !nearFilm || failed) return;
-  const source = mobile.matches ? video.dataset.srcMobile : video.dataset.srcDesktop;
-  if (!source || source === currentSource) return;
-  // Rotation changes the encoded resolution while preserving the same moment,
-  // manual pause and completed state. This is the only automatic video seek.
-  pendingFraction = currentSource && Number.isFinite(video.duration) && video.duration > 0
-    ? clamp(video.currentTime / video.duration) : pendingFraction ?? 0;
-  filmEnded = filmEnded || video.ended;
-  pauseFilm();
-  sourceSerial += 1;
-  currentSource = source;
-  stage.classList.remove('is-film-ready');
-  video.muted = true;
-  video.playsInline = true;
-  video.loop = false;
-  video.playbackRate = 1;
-  video.preload = 'auto';
-  video.src = source;
-  setFilmState(manualPaused ? 'paused' : filmEnded ? 'ended' : 'loading');
-  video.load();
+  syncFilm();
 }
 const updatePreference = () => {
   root.classList.toggle('reduced-motion', preference.matches);
@@ -247,101 +220,43 @@ const updatePreference = () => {
   if (!allowed()) {
     cancelMotion();
     galleryMotionStops.forEach(stop => stop());
-    pauseFilm();
-    if (video?.hasAttribute('src')) {
-      sourceSerial += 1;
-      video.removeAttribute('src');
-      currentSource = '';
-      pendingFraction = null;
-      filmEnded = false;
-      playBlocked = false;
-      video.load();
-    }
-    stage?.classList.remove('is-film-ready');
-    setFilmState(preference.matches ? 'reduced' : 'saving');
-  } else {
-    setFilmState(failed ? 'error' : filmEnded ? 'ended' : manualPaused ? 'paused' : 'idle');
-    loadFilm();
-    syncFilm();
+    unloadFilm();
+    displayedProgress = 0;
+    if (camera) camera.style.transform = '';
   }
   invalidateLayout();
 };
 if (stage && video) {
-  video.loop = false;
-  video.muted = true;
-  video.playsInline = true;
-  video.playbackRate = 1;
-  if (toggle) {
-    toggle.hidden = false;
-    toggle.addEventListener('click', () => {
-      if (!allowed() || failed) return;
-      if (filmEnded || video.ended) {
-        filmEnded = false;
-        manualPaused = false;
-        playBlocked = false;
-        if (video.readyState >= 1) video.currentTime = 0;
-        else pendingFraction = 0;
-      } else if (manualPaused || playBlocked || ['idle', 'ready', 'paused', 'blocked'].includes(filmState)) {
-        manualPaused = false;
-        playBlocked = false;
-      } else {
-        manualPaused = true;
-        pauseFilm();
-        setFilmState('paused');
-        return;
-      }
-      loadFilm();
-      syncFilm();
-    });
-  }
-  video.addEventListener('loadedmetadata', () => {
-    if (!allowed() || !currentSource || failed) return;
-    video.playbackRate = 1;
-    const fraction = pendingFraction;
-    pendingFraction = null;
-    if (fraction !== null && fraction > 0 && Number.isFinite(video.duration)) {
-      video.currentTime = clamp(fraction) * Math.max(0, video.duration - .05);
-    }
-  });
-  const decoded = () => {
-    if (!allowed() || !currentSource || failed || video.seeking) return;
-    if (manualPaused || filmEnded) stage.classList.add('is-film-ready');
+  toggle.hidden = false;
+  toggle.addEventListener('click', () => {
+    if (!canScrub()) return;
+    manualPaused = !manualPaused;
     syncFilm();
+  });
+  video.addEventListener('loadedmetadata', syncFilm);
+  const decoded = () => {
+    if (!currentSource || !canScrub()) return;
+    if (video.readyState >= 2) stage.classList.add('is-film-ready');
+    flushSeek();
+    setFilmState(manualPaused ? 'paused' : 'scrubbing');
   };
   video.addEventListener('loadeddata', decoded);
-  video.addEventListener('canplay', decoded);
   video.addEventListener('seeked', decoded);
-  video.addEventListener('playing', () => {
-    if (!canPlayFilm()) { pauseFilm(); syncFilm(); return; }
-    playPending = false;
-    stage.classList.add('is-film-ready');
-    setFilmState('playing');
-  });
-  video.addEventListener('ended', () => {
-    filmEnded = true;
-    playPending = false;
-    setFilmState('ended');
-  });
   video.addEventListener('error', () => {
     if (!currentSource || !allowed()) return;
     failed = true;
-    pauseFilm();
-    stage.classList.remove('is-film-ready');
+    unloadFilm();
     setFilmState('error');
+    invalidateLayout();
   });
   if ('IntersectionObserver' in window) {
-    const preload = new IntersectionObserver(entries => {
+    const observer = new IntersectionObserver(entries => {
       nearFilm = entries[0].isIntersecting;
-      if (nearFilm) loadFilm();
-    }, { rootMargin: '240px 0px' });
-    preload.observe(stage);
-    const visibility = new IntersectionObserver(entries => {
-      inFilm = entries[0].isIntersecting && entries[0].intersectionRatio >= .1;
-      syncFilm();
-    }, { threshold: [0, .1] });
-    visibility.observe(video);
-  } else { nearFilm = true; inFilm = true; loadFilm(); }
-  mobile.addEventListener('change', () => { loadFilm(); invalidateLayout(); });
+      if (nearFilm) { loadFilm(); syncFilm(); }
+    }, { rootMargin: '200px 0px' });
+    observer.observe(stage);
+  }
+  mobile.addEventListener('change', invalidateLayout);
 }
 preference.addEventListener('change', updatePreference);
 connection?.addEventListener?.('change', updatePreference);
@@ -351,17 +266,15 @@ window.addEventListener('resize', invalidateLayout, { passive: true });
 window.visualViewport?.addEventListener('resize', invalidateLayout, { passive: true });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) cancelMotion();
-  syncFilm();
   if (!document.hidden) invalidateLayout();
 });
 window.addEventListener('pagehide', () => {
   filmPageActive = false;
   cancelMotion();
-  pauseFilm();
   cancelAnimationFrame(frame);
   frame = 0;
 });
-window.addEventListener('pageshow', () => { filmPageActive = true; syncFilm(); invalidateLayout(); });
+window.addEventListener('pageshow', () => { filmPageActive = true; invalidateLayout(); });
 
 // Native details change state immediately; the content receives a brief,
 // interruptible opening transition. Closing never waits for an animation.
@@ -508,6 +421,7 @@ const ambientEntries = ambientImages.map((image, index) => ({
   index,
   visible: false,
   animation: null,
+  completed: false,
   link: image.closest('a')
 }));
 let visualPaused = false;
@@ -524,11 +438,11 @@ const setVisualState = state => {
   const label = state === 'reduced' ? 'Animazioni ridotte'
     : state === 'saving' ? 'Risparmio dati'
     : state === 'unsupported' ? 'Immagini fisse'
-    : visualPaused ? 'Anima le immagini' : 'Ferma le immagini';
+    : visualPaused ? 'Riprendi le immagini' : state === 'complete' ? 'Rianima le immagini' : 'Ferma le immagini';
   const explanation = state === 'reduced' ? 'Immagini fisse: movimento ridotto attivo.'
     : state === 'saving' ? 'Immagini fisse: risparmio dati attivo.'
     : state === 'unsupported' ? 'Immagini fisse in questo browser.'
-    : visualPaused ? 'Movimento delle immagini in pausa.' : 'Immagini in movimento';
+    : visualPaused ? 'Movimento delle immagini in pausa.' : state === 'complete' ? 'Movimento completato. Puoi rivederlo.' : 'Brevi movimenti delle immagini.';
   visualToggles.forEach(button => {
     button.disabled = disabled;
     button.textContent = label;
@@ -542,28 +456,31 @@ const createAmbientAnimation = entry => {
   const horizontal = entry.index % 2 ? -1 : 1;
   const vertical = entry.index % 3 ? 1 : -1;
   const animation = entry.image.animate([
-    { transform: `translate3d(${-.8 * horizontal}%, ${-.4 * vertical}%, 0) scale(1.025)` },
-    { transform: `translate3d(${.8 * horizontal}%, ${.4 * vertical}%, 0) scale(1.085)` }
+    { transform: 'translate3d(0,0,0) scale(1)' },
+    { transform: `translate3d(${.25 * horizontal}%, ${.15 * vertical}%, 0) scale(1.045)` }
   ], {
-    duration: 9000 + entry.index % 3 * 1500,
-    easing: 'ease-in-out',
-    iterations: Infinity,
-    direction: 'alternate',
+    duration: 1800,
+    easing: 'cubic-bezier(.22,1,.36,1)',
+    iterations: 1,
     fill: 'both'
   });
   // The synchronization below decides when to run, including the first frame.
   animation.pause();
+  animation.addEventListener('finish', () => { entry.completed = true; syncAmbientImages(); });
   return animation;
 };
 
 const syncAmbientImages = () => {
   const reset = !ambientSupported || !allowed();
+  const visible = ambientEntries.filter(entry => entry.visible && entry.image.complete);
+  const complete = visible.length > 0 && visible.every(entry => entry.completed);
   setVisualState(!ambientSupported ? 'unsupported' : preference.matches ? 'reduced'
-    : savingData() ? 'saving' : visualPaused ? 'paused' : 'running');
+    : savingData() ? 'saving' : visualPaused ? 'paused' : complete ? 'complete' : 'running');
   for (const entry of ambientEntries) {
     if (reset) {
       entry.animation?.cancel();
       entry.animation = null;
+      entry.completed = false;
       entry.image.dataset.ambientState = 'static';
       continue;
     }
@@ -571,7 +488,9 @@ const syncAmbientImages = () => {
     const shouldRun = entry.visible && visualPageActive && !document.hidden
       && !visualPaused && !focused && pointerImage !== entry.image
       && entry.image.complete && entry.image.naturalWidth > 0;
-    if (shouldRun) {
+    if (entry.completed) {
+      entry.image.dataset.ambientState = 'complete';
+    } else if (shouldRun) {
       entry.animation ||= createAmbientAnimation(entry);
       if (entry.animation.playState !== 'running') entry.animation.play();
       entry.image.dataset.ambientState = 'running';
@@ -591,7 +510,11 @@ visualToggles.forEach(button => {
   button.hidden = false;
   button.addEventListener('click', () => {
     if (!ambientSupported || !allowed()) return;
-    visualPaused = !visualPaused;
+    if (visualState === 'complete') {
+      ambientEntries.forEach(entry => { entry.animation?.cancel(); entry.animation = null; entry.completed = false; });
+      visualPaused = false;
+    } else visualPaused = !visualPaused;
+    historyMotion?.setPaused(visualPaused);
     syncAmbientImages();
   });
 });
