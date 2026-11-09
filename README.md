@@ -10,6 +10,8 @@ L’interno desktop è restaurato in 4K dal file originale del provider. Il tele
 
 Le fotografie hanno varianti AVIF/WebP a 1280, 1920, 2560 e 3840 pixel. I browser scelgono la risoluzione necessaria in base a dimensione e densità dello schermo; non viene imposta una piccola copia a uno schermo ad alta densità. Le versioni da 3840 pixel sono presenti nella build. Poster derivati dai primi fotogrammi dei video e codifica con keyframe frequenti per lo scorrimento.
 
+I quattro video sono serviti dalle copie immutabili nello stesso repository GitHub, tramite il servizio raw.githubusercontent.com con CORS e richieste parziali. Il pacchetto Pages contiene immagini e interfaccia, senza duplicare i50MB dei video; la qualità e i byte dei filmati restano identici. I riferimenti sono fissati al commit62cd314: per aggiornare i video occorre pubblicare prima i nuovi file e poi aggiornare quel riferimento.
+
 I video 4K sono la scelta predefinita. Un errore del decoder può attivare una sola alternativa FullHD; se anche questa fallisce rimane il poster. Movimento ridotto, risparmio dati, JavaScript disattivato o spazio insufficiente conservano immagine e contenuti senza un percorso vuoto. Le animazioni delle foto dei servizi durano 1,4 secondi, con un leggero avvicinamento 1,025, poi si fermano; pausa/ripresa/ripetizione restano disponibili.
 
 ## Una storia più documentata

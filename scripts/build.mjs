@@ -15,7 +15,7 @@ const files = [
   ...pictureKeys.flatMap(key => [1280, 1920, 2560, 3840].flatMap(width =>
     ['avif', 'webp'].map(format => `assets/quality/${key}-${width}.${format}`))),
   ...['desktop', 'mobile'].flatMap(view => ['1080', '4k'].flatMap(quality =>
-    ['avif', 'webp', 'mp4'].map(format => `assets/quality/hero-${view}-${quality}.${format}`))),
+    ['avif', 'webp'].map(format => `assets/quality/hero-${view}-${quality}.${format}`))),
 ];
 
 const html = await readFile(path.join(root, 'index.html'), 'utf8');
