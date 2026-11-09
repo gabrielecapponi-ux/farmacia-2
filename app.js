@@ -1,4 +1,4 @@
-import { initHistory } from './history.js?v=0.8.0';
+import { initHistory } from './history.js?v=0.9.0';
 const root = document.documentElement;
 const preference = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 820px)');
@@ -98,6 +98,7 @@ let manualPaused = false;
 let failed = false;
 let filmPageActive = true;
 let currentSource = '';
+let useCompatibleVideo = false;
 let filmState = '';
 let desiredTime = 0;
 let displayedProgress = 0;
@@ -140,11 +141,14 @@ function unloadFilm() {
 }
 function loadFilm() {
   if (!video || !nearFilm || !canScrub()) return;
-  const source = mobile.matches ? video.dataset.srcMobile : video.dataset.srcDesktop;
+  const source = useCompatibleVideo
+    ? mobile.matches ? video.dataset.srcMobileFallback : video.dataset.srcDesktopFallback
+    : mobile.matches ? video.dataset.srcMobile : video.dataset.srcDesktop;
   if (!source || source === currentSource) return;
   video.pause();
   stage.classList.remove('is-film-ready');
   currentSource = source;
+  stage.dataset.videoQuality = useCompatibleVideo ? '1080p' : '4k';
   video.muted = true;
   video.playsInline = true;
   video.loop = false;
@@ -156,7 +160,7 @@ function loadFilm() {
 // Only one decoded seek may be in flight. Each completion consumes the latest
 // requested scroll position, so rapid gestures never create a seek queue.
 function flushSeek() {
-  if (!video || !canScrub() || manualPaused || !currentSource || video.readyState < 1 || video.seeking) return;
+  if (!video || !canScrub() || !currentSource || video.readyState < 1 || video.seeking) return;
   if (Math.abs(video.currentTime - desiredTime) > 1 / 48) video.currentTime = desiredTime;
 }
 function measureLayout() {
@@ -192,7 +196,7 @@ function syncFilm() {
   stage.dataset.scrollProgress = scrollProgress.toFixed(4);
   if (!manualPaused && filmPageActive && !document.hidden) displayedProgress = scrollProgress;
   stage.dataset.progress = displayedProgress.toFixed(4);
-  if (camera) camera.style.transform = `scale(${(1 + displayedProgress * .42).toFixed(4)})`;
+  if (camera) camera.style.transform = `scale(${(1 + displayedProgress * .08).toFixed(4)})`;
   if (progressBar) progressBar.style.transform = `scaleX(${displayedProgress})`;
   if (Number.isFinite(video.duration)) desiredTime = displayedProgress * Math.max(0, video.duration - .05);
   flushSeek();
@@ -244,6 +248,13 @@ if (stage && video) {
   video.addEventListener('seeked', decoded);
   video.addEventListener('error', () => {
     if (!currentSource || !allowed()) return;
+    // One bounded compatibility fallback; never retry a failed source forever.
+    if (!useCompatibleVideo && (video.error?.code === 3 || video.error?.code === 4)) {
+      useCompatibleVideo = true;
+      unloadFilm();
+      loadFilm();
+      return;
+    }
     failed = true;
     unloadFilm();
     setFilmState('error');
@@ -457,9 +468,9 @@ const createAmbientAnimation = entry => {
   const vertical = entry.index % 3 ? 1 : -1;
   const animation = entry.image.animate([
     { transform: 'translate3d(0,0,0) scale(1)' },
-    { transform: `translate3d(${.25 * horizontal}%, ${.15 * vertical}%, 0) scale(1.045)` }
+    { transform: `translate3d(${.25 * horizontal}%, ${.15 * vertical}%, 0) scale(1.025)` }
   ], {
-    duration: 1800,
+    duration: 1400,
     easing: 'cubic-bezier(.22,1,.36,1)',
     iterations: 1,
     fill: 'both'

@@ -1,0 +1,8 @@
+/* Dedicated portrait media preserves detail rather than cropping a wide movie. */
+@media(max-width:820px){.entry-camera{transform-origin:50% 58%}.entry-camera .film-poster>img,.entry-camera .hero-video{object-position:50% 58%}}
+.contact-image{display:grid;place-content:center;background:#e3e9df;padding:clamp(24px,4vw,64px);min-height:430px}
+.contact-image picture,.contact-image img{position:relative;inset:auto;width:100%;height:auto;object-fit:contain}
+.contact-image picture{border:8px solid #f7f9f3;box-shadow:0 4px 30px #193d3212}
+.contact-image>span{position:relative;left:auto;bottom:auto;align-self:start;margin-top:18px;background:transparent;color:#3c5748;padding:0;font-size:12px;line-height:1.6;max-width:32em}
+.gallery-caption p{max-width:500px}
+@media(max-width:820px){.contact-image{min-height:0;padding:40px 20px}.contact-image>span{margin-top:12px}.contact-image picture{border-width:6px}}
