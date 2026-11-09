@@ -74,12 +74,9 @@ if ('IntersectionObserver' in window) {
 }
 
 const stage = document.querySelector('[data-film-stage]');
-const sticky = document.querySelector('[data-film-sticky]');
 const video = document.querySelector('[data-hero-video]');
 const toggle = document.querySelector('[data-motion-toggle]');
 const status = document.querySelector('[data-film-status]');
-const progressBar = document.querySelector('[data-film-progress]');
-const chapters = [...document.querySelectorAll('[data-film-chapter]')];
 const navItems = [...document.querySelectorAll('.site-nav a[href^="#"]')]
   .map(link => ({ link, section: document.getElementById(link.hash.slice(1)) }))
   .filter(item => item.section);
@@ -87,18 +84,8 @@ const galleryMeasurements = [];
 const galleryMotionStops = [];
 let frame = 0;
 let layoutDirty = true;
-let geometry = { top: 0, range: 0 };
 let navStops = [];
 let headerHeight = 0;
-let nearFilm = false;
-let inFilm = true;
-let paused = false;
-let failed = false;
-let filmState = '';
-let progress = -1;
-let desiredTime = 0;
-let currentSource = '';
-let currentChapter = -1;
 let currentNav = null;
 const savingData = () => Boolean(connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || ''));
 const allowed = () => !preference.matches && !savingData();
@@ -106,92 +93,23 @@ const setPixelProperty = (element, name, value) => {
   const next = `${Math.ceil(value)}px`;
   if (element.style.getPropertyValue(name) !== next) element.style.setProperty(name, next);
 };
-const scheduleFilm = () => { if (!frame) frame = requestAnimationFrame(updateFilm); };
-const invalidateLayout = () => { layoutDirty = true; scheduleFilm(); };
-const setFilmState = next => {
-  if (!stage || next === filmState) return;
-  filmState = next;
-  stage.dataset.filmState = next;
-  if (status) status.textContent = {
-    idle: 'Scorri per esplorare',
-    loading: 'Il film si sta preparando',
-    ready: 'Scorri per esplorare',
-    paused: 'Movimento in pausa',
-    reduced: 'Movimento ridotto: immagine fissa',
-    saving: 'Risparmio dati: immagine fissa',
-    error: 'Video non disponibile: immagine fissa'
-  }[next];
-  if (toggle) {
-    const disabled = ['reduced', 'saving', 'error'].includes(next);
-    toggle.disabled = disabled;
-    toggle.setAttribute('aria-pressed', String(paused || disabled));
-    toggle.textContent = next === 'reduced' ? 'Animazioni ridotte'
-      : next === 'saving' ? 'Risparmio dati'
-      : next === 'error' ? 'Immagine fissa'
-      : paused ? 'Riprendi il movimento' : 'Ferma il movimento';
-  }
-  invalidateLayout();
-};
+const scheduleNavigation = () => { if (!frame) frame = requestAnimationFrame(updateNavigation); };
+const invalidateLayout = () => { layoutDirty = true; scheduleNavigation(); };
 
-// Layout is measured only when it changes. A scroll frame uses these cached
-// coordinates rather than reading computed styles or element boxes repeatedly.
+// Page scrolling updates navigation only. The interior video uses ordinary
+// native playback at 1x; its very slow camera is encoded in the media itself.
 function measureLayout() {
   layoutDirty = false;
   headerHeight = header?.getBoundingClientRect().height || 0;
-  const dockHeight = dock?.getBoundingClientRect().height || 0;
-  const viewportHeight = window.visualViewport?.height || window.innerHeight;
   setPixelProperty(root, '--header-space', headerHeight);
-  setPixelProperty(root, '--dock-space', dockHeight);
-  if (stage && sticky) {
-    const available = Math.max(0, viewportHeight - headerHeight - dockHeight - 24);
-    const contentHeight = ['.film-top', '.film-copy', '.film-bottom']
-      .reduce((total, selector) => total + (stage.querySelector(selector)?.getBoundingClientRect().height || 0), 96);
-    setPixelProperty(stage, '--film-content-min', contentHeight);
-    setPixelProperty(stage, '--film-available', available);
-    const compact = available < 360 || contentHeight > available;
-    root.classList.toggle('film-compact', compact);
-    stage.classList.toggle('film-compact', compact);
-    const stageTop = window.scrollY + stage.getBoundingClientRect().top;
-    if (compact && allowed() && !failed) {
-      // On short screens the film moves through the normal page flow, without
-      // a tall pinned runway. Scroll still advances its four-second camera.
-      geometry = { top: stageTop - available * .5, range: Math.max(1, stage.offsetHeight - available * .25) };
-    } else {
-      const stickyTop = parseFloat(getComputedStyle(sticky).top) || 0;
-      geometry = { top: stageTop - stickyTop, range: Math.max(0, stage.offsetHeight - sticky.offsetHeight) };
-    }
-  }
+  setPixelProperty(root, '--dock-space', dock?.getBoundingClientRect().height || 0);
   navStops = navItems.map(item => ({ ...item, top: window.scrollY + item.section.getBoundingClientRect().top }));
   galleryMeasurements.forEach(measure => measure());
 }
-const seek = () => {
-  if (!video || !allowed() || paused || failed || document.hidden || !inFilm || video.seeking || video.readyState < 1 || !Number.isFinite(video.duration)) return;
-  if (Math.abs(video.currentTime - desiredTime) < .035) return;
-  try { video.currentTime = desiredTime; } catch { /* The poster stays until media is seekable. */ }
-};
-function updateFilm() {
+function updateNavigation() {
   frame = 0;
   if (layoutDirty) measureLayout();
   const position = window.scrollY;
-  const nextProgress = geometry.range ? clamp((position - geometry.top) / geometry.range) : 0;
-  if (stage && nextProgress !== progress) {
-    progress = nextProgress;
-    stage.style.setProperty('--film-progress', progress.toFixed(4));
-    if (progressBar) progressBar.style.transform = `scaleX(${progress})`;
-    const index = Math.min(chapters.length - 1, Math.floor(progress * chapters.length));
-    if (index !== currentChapter) {
-      currentChapter = index;
-      chapters.forEach((chapter, i) => {
-        chapter.classList.toggle('is-active', i === index);
-        if (i === index) chapter.setAttribute('aria-current', 'step');
-        else chapter.removeAttribute('aria-current');
-      });
-    }
-  }
-  if (video && Number.isFinite(video.duration)) {
-    desiredTime = Math.max(0, nextProgress) * Math.max(0, video.duration - .05);
-    seek();
-  }
   let active = null;
   for (const item of navStops) {
     if (item.top <= position + headerHeight + 100) active = item;
@@ -204,73 +122,212 @@ function updateFilm() {
     });
   }
 }
-const loadFilm = () => {
+
+let nearFilm = false;
+let inFilm = false;
+let manualPaused = false;
+let filmEnded = false;
+let playBlocked = false;
+let failed = false;
+let filmPageActive = true;
+let filmState = '';
+let currentSource = '';
+let pendingFraction = null;
+let sourceSerial = 0;
+let playRequest = 0;
+let playPending = false;
+const setFilmState = next => {
+  if (!stage || next === filmState) return;
+  filmState = next;
+  stage.dataset.filmState = next;
+  if (status) status.textContent = {
+    idle: 'Uno sguardo lento all’interno',
+    loading: 'Il video si sta preparando',
+    ready: 'Uno sguardo lento all’interno',
+    playing: 'Uno sguardo lento all’interno',
+    paused: 'Video in pausa',
+    ended: 'Puoi rivedere l’interno',
+    blocked: 'Premi per avviare il video',
+    reduced: 'Movimento ridotto: immagine fissa',
+    saving: 'Risparmio dati: immagine fissa',
+    error: 'Video non disponibile: immagine fissa'
+  }[next];
+  if (toggle) {
+    const disabled = ['reduced', 'saving', 'error'].includes(next);
+    toggle.disabled = disabled;
+    toggle.setAttribute('aria-pressed', String(next === 'paused' || disabled));
+    toggle.textContent = next === 'reduced' ? 'Movimento ridotto'
+      : next === 'saving' ? 'Risparmio dati'
+      : next === 'error' ? 'Immagine fissa'
+      : next === 'ended' ? 'Rivedi il video'
+      : ['idle', 'ready', 'blocked'].includes(next) ? 'Avvia il video'
+      : next === 'paused' ? 'Riprendi il video' : 'Ferma il video';
+  }
+};
+const pauseFilm = () => {
+  playRequest += 1;
+  playPending = false;
+  video?.pause();
+};
+const canPlayFilm = () => allowed() && !failed && !manualPaused && !filmEnded
+  && !playBlocked && filmPageActive && !document.hidden && inFilm;
+const playFilm = () => {
+  if (!video || !currentSource || !canPlayFilm() || video.readyState < 2 || playPending) return;
+  if (!video.paused) {
+    stage?.classList.add('is-film-ready');
+    setFilmState('playing');
+    return;
+  }
+  const request = ++playRequest;
+  const serial = sourceSerial;
+  playPending = true;
+  Promise.resolve(video.play()).then(() => {
+    if (request !== playRequest || serial !== sourceSerial) return;
+    playPending = false;
+    if (!canPlayFilm()) { pauseFilm(); syncFilm(); return; }
+    stage?.classList.add('is-film-ready');
+    setFilmState('playing');
+  }).catch(error => {
+    if (request !== playRequest || serial !== sourceSerial) return;
+    playPending = false;
+    if (!allowed() || manualPaused || document.hidden || !filmPageActive || !inFilm) { syncFilm(); return; }
+    // A browser may decline autoplay. Keep the poster and an ordinary play
+    // button; this is not a media error or a reason for automatic retries.
+    if (error?.name === 'AbortError' && video.seeking) return;
+    playBlocked = true;
+    stage?.classList.remove('is-film-ready');
+    setFilmState('blocked');
+  });
+};
+function syncFilm() {
+  if (!video || !stage || !allowed()) return;
+  if (failed) { pauseFilm(); setFilmState('error'); return; }
+  if (!currentSource) { setFilmState('idle'); loadFilm(); return; }
+  if (filmEnded || video.ended) {
+    filmEnded = true;
+    pauseFilm();
+    if (video.readyState >= 2) stage.classList.add('is-film-ready');
+    setFilmState('ended');
+    return;
+  }
+  if (manualPaused || !inFilm || document.hidden || !filmPageActive) {
+    pauseFilm();
+    setFilmState(manualPaused || video.readyState >= 2 ? 'paused' : 'loading');
+    return;
+  }
+  if (playBlocked) { setFilmState('blocked'); return; }
+  if (video.readyState < 2 || video.seeking) { setFilmState('loading'); return; }
+  playFilm();
+}
+function loadFilm() {
   if (!video || !stage || !allowed() || !nearFilm || failed) return;
   const source = mobile.matches ? video.dataset.srcMobile : video.dataset.srcDesktop;
   if (!source || source === currentSource) return;
+  // Rotation changes the encoded resolution while preserving the same moment,
+  // manual pause and completed state. This is the only automatic video seek.
+  pendingFraction = currentSource && Number.isFinite(video.duration) && video.duration > 0
+    ? clamp(video.currentTime / video.duration) : pendingFraction ?? 0;
+  filmEnded = filmEnded || video.ended;
+  pauseFilm();
+  sourceSerial += 1;
   currentSource = source;
   stage.classList.remove('is-film-ready');
   video.muted = true;
   video.playsInline = true;
+  video.loop = false;
+  video.playbackRate = 1;
   video.preload = 'auto';
   video.src = source;
-  setFilmState(paused ? 'paused' : 'loading');
+  setFilmState(manualPaused ? 'paused' : filmEnded ? 'ended' : 'loading');
   video.load();
-};
+}
 const updatePreference = () => {
   root.classList.toggle('reduced-motion', preference.matches);
   root.classList.toggle('saving-data', savingData());
   if (!allowed()) {
     cancelMotion();
     galleryMotionStops.forEach(stop => stop());
-    if (video) {
-      video.pause();
-      if (video.hasAttribute('src')) {
-        video.removeAttribute('src');
-        currentSource = '';
-        video.load();
-      }
+    pauseFilm();
+    if (video?.hasAttribute('src')) {
+      sourceSerial += 1;
+      video.removeAttribute('src');
+      currentSource = '';
+      pendingFraction = null;
+      filmEnded = false;
+      playBlocked = false;
+      video.load();
     }
     stage?.classList.remove('is-film-ready');
     setFilmState(preference.matches ? 'reduced' : 'saving');
   } else {
-    setFilmState(failed ? 'error' : paused ? 'paused' : video?.readyState >= 2 ? 'ready' : 'idle');
+    setFilmState(failed ? 'error' : filmEnded ? 'ended' : manualPaused ? 'paused' : 'idle');
     loadFilm();
+    syncFilm();
   }
   invalidateLayout();
 };
-if (stage && sticky && video) {
+if (stage && video) {
+  video.loop = false;
+  video.muted = true;
+  video.playsInline = true;
+  video.playbackRate = 1;
   if (toggle) {
     toggle.hidden = false;
     toggle.addEventListener('click', () => {
       if (!allowed() || failed) return;
-      paused = !paused;
-      video.pause();
-      setFilmState(paused ? 'paused' : video.readyState >= 2 ? 'ready' : 'loading');
-      if (!paused) { loadFilm(); scheduleFilm(); }
+      if (filmEnded || video.ended) {
+        filmEnded = false;
+        manualPaused = false;
+        playBlocked = false;
+        if (video.readyState >= 1) video.currentTime = 0;
+        else pendingFraction = 0;
+      } else if (manualPaused || playBlocked || ['idle', 'ready', 'paused', 'blocked'].includes(filmState)) {
+        manualPaused = false;
+        playBlocked = false;
+      } else {
+        manualPaused = true;
+        pauseFilm();
+        setFilmState('paused');
+        return;
+      }
+      loadFilm();
+      syncFilm();
     });
   }
+  video.addEventListener('loadedmetadata', () => {
+    if (!allowed() || !currentSource || failed) return;
+    video.playbackRate = 1;
+    const fraction = pendingFraction;
+    pendingFraction = null;
+    if (fraction !== null && fraction > 0 && Number.isFinite(video.duration)) {
+      video.currentTime = clamp(fraction) * Math.max(0, video.duration - .05);
+    }
+  });
   const decoded = () => {
-    if (!allowed() || failed || !currentSource) return;
-    stage.classList.add('is-film-ready');
-    setFilmState(paused ? 'paused' : 'ready');
-    scheduleFilm();
+    if (!allowed() || !currentSource || failed || video.seeking) return;
+    if (manualPaused || filmEnded) stage.classList.add('is-film-ready');
+    syncFilm();
   };
-  video.addEventListener('loadedmetadata', invalidateLayout);
   video.addEventListener('loadeddata', decoded);
+  video.addEventListener('canplay', decoded);
   video.addEventListener('seeked', decoded);
+  video.addEventListener('playing', () => {
+    if (!canPlayFilm()) { pauseFilm(); syncFilm(); return; }
+    playPending = false;
+    stage.classList.add('is-film-ready');
+    setFilmState('playing');
+  });
+  video.addEventListener('ended', () => {
+    filmEnded = true;
+    playPending = false;
+    setFilmState('ended');
+  });
   video.addEventListener('error', () => {
     if (!currentSource || !allowed()) return;
     failed = true;
+    pauseFilm();
     stage.classList.remove('is-film-ready');
     setFilmState('error');
-  });
-  chapters.forEach((chapter, i) => {
-    chapter.hidden = false;
-    chapter.addEventListener('click', () => {
-      if (layoutDirty) measureLayout();
-      window.scrollTo({ top: geometry.top + geometry.range * i / Math.max(1, chapters.length - 1), behavior: allowed() ? 'smooth' : 'instant' });
-    });
   });
   if ('IntersectionObserver' in window) {
     const preload = new IntersectionObserver(entries => {
@@ -279,31 +336,32 @@ if (stage && sticky && video) {
     }, { rootMargin: '240px 0px' });
     preload.observe(stage);
     const visibility = new IntersectionObserver(entries => {
-      inFilm = entries[0].isIntersecting;
-      if (!inFilm) video.pause();
-      else scheduleFilm();
-    });
-    visibility.observe(sticky);
-  } else { nearFilm = true; loadFilm(); }
+      inFilm = entries[0].isIntersecting && entries[0].intersectionRatio >= .1;
+      syncFilm();
+    }, { threshold: [0, .1] });
+    visibility.observe(video);
+  } else { nearFilm = true; inFilm = true; loadFilm(); }
   mobile.addEventListener('change', () => { loadFilm(); invalidateLayout(); });
 }
 preference.addEventListener('change', updatePreference);
 connection?.addEventListener?.('change', updatePreference);
 updatePreference();
-window.addEventListener('scroll', scheduleFilm, { passive: true });
+window.addEventListener('scroll', scheduleNavigation, { passive: true });
 window.addEventListener('resize', invalidateLayout, { passive: true });
 window.visualViewport?.addEventListener('resize', invalidateLayout, { passive: true });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { cancelMotion(); video?.pause(); }
-  else invalidateLayout();
+  if (document.hidden) cancelMotion();
+  syncFilm();
+  if (!document.hidden) invalidateLayout();
 });
 window.addEventListener('pagehide', () => {
+  filmPageActive = false;
   cancelMotion();
-  video?.pause();
+  pauseFilm();
   cancelAnimationFrame(frame);
   frame = 0;
 });
-window.addEventListener('pageshow', invalidateLayout);
+window.addEventListener('pageshow', () => { filmPageActive = true; syncFilm(); invalidateLayout(); });
 
 // Native details change state immediately; the content receives a brief,
 // interruptible opening transition. Closing never waits for an animation.
@@ -426,11 +484,11 @@ document.querySelectorAll('[data-gallery]').forEach(gallery => {
 // while scroll itself only consumes cached coordinates.
 if ('ResizeObserver' in window) {
   const sizing = new ResizeObserver(invalidateLayout);
-  [header, dock, stage, document.body, stage?.querySelector('.film-top'), stage?.querySelector('.film-copy'), stage?.querySelector('.film-bottom')]
+  [header, dock, document.body]
     .filter(Boolean).forEach(node => sizing.observe(node));
 }
 if ('IntersectionObserver' in window) {
-  const sections = new IntersectionObserver(scheduleFilm, { threshold: [0, .2, .6, 1] });
+  const sections = new IntersectionObserver(scheduleNavigation, { threshold: [0, .2, .6, 1] });
   navItems.forEach(({ section }) => sections.observe(section));
 }
 document.fonts?.ready.then(invalidateLayout);
