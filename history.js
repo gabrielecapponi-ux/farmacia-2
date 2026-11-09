@@ -1,4 +1,4 @@
-// Scroll changes the illustration; every historical fact remains ordinary HTML.
+// Scroll changes the visual; dates and photographic provenance remain ordinary HTML.
 // No continuous render loop, wheel interception or scroll locking is used.
 export function initHistory({ reducedMotion, connection } = {}) {
   const section = document.querySelector('[data-history]');
@@ -22,6 +22,8 @@ export function initHistory({ reducedMotion, connection } = {}) {
     const frame = document.createElement('div');
     frame.className = 'story-frame';
     frame.dataset.historyFrame = String(index);
+    frame.dataset.historyKind = step.dataset.historyKind || 'illustration';
+    frame.classList.toggle('is-document', frame.dataset.historyKind === 'document');
     const picture = step.querySelector('picture').cloneNode(true);
     picture.querySelector('img').alt = '';
     picture.querySelector('img').loading = 'eager';
@@ -41,7 +43,7 @@ export function initHistory({ reducedMotion, connection } = {}) {
   yearLabel.className = 'story-stage-year';
   const note = document.createElement('span');
   note.className = 'story-stage-note';
-  note.textContent = 'Scene illustrative IA';
+  note.textContent = '';
   label.append(yearLabel, note);
   stage.append(label);
   layout.prepend(stage);
@@ -68,6 +70,9 @@ export function initHistory({ reducedMotion, connection } = {}) {
   const mayAnimate = () => !destroyed && !paused && !interactiveFocus && !isReduced() && !isSaving() && !document.hidden;
   const animatePhoto = image => {
     if (!image?.complete || !image.naturalWidth || !mayAnimate() || !image.animate) return;
+    // The source photograph is presented in full. Do not zoom into a document
+    // or crop its edges while describing its historical provenance.
+    if (image.closest('[data-history-kind="document"], .is-document')) return;
     const animation = image.animate([{ transform: 'scale(1.035)' }, { transform: 'scale(1)' }], { duration: 1800, easing: 'cubic-bezier(.22,1,.36,1)' });
     animations.add(animation);
     animation.finished.then(() => animations.delete(animation), () => animations.delete(animation));
@@ -88,6 +93,11 @@ export function initHistory({ reducedMotion, connection } = {}) {
     active = index;
     section.dataset.activeIndex = String(index);
     yearLabel.textContent = steps[index].dataset.historyYear;
+    const documentPhoto = steps[index].dataset.historyKind === 'document';
+    stage.classList.toggle('is-document', documentPhoto);
+    note.textContent = steps[index].dataset.historyCaption
+      || steps[index].querySelector('figcaption')?.textContent
+      || (documentPhoto ? 'Foto pubblicata nel 2016 · restauro digitale' : 'Visual illustrativo IA');
     frames.forEach((frame, i) => frame.classList.toggle('is-active', i === index));
     steps.forEach((step, i) => step.classList.toggle('is-active', i === index));
     if (changed) {
@@ -136,7 +146,9 @@ export function initHistory({ reducedMotion, connection } = {}) {
     const tallestCopy = Math.max(...steps.map(step => step.querySelector('.story-copy').scrollHeight));
     // A tall header or enlarged text may leave too little room for a sticky scene.
     // Keep every scene in the ordinary flow rather than squeezing its content.
-    const comfortable = available >= 360 && tallestCopy <= available;
+    const photoWidth = layout.getBoundingClientRect().width * .56;
+    const imageHeight = photoWidth / 1.6;
+    const comfortable = available >= 300 && imageHeight <= available && tallestCopy <= available;
     const next = wide.matches && comfortable && !mediaFailed && !isReduced() && !isSaving() && 'IntersectionObserver' in window;
     enhanced = next;
     section.classList.toggle('is-history-enhanced', next);
@@ -147,6 +159,7 @@ export function initHistory({ reducedMotion, connection } = {}) {
       active = -1;
       stopAnimations();
       frames.forEach(frame => frame.classList.remove('is-active'));
+      stage.classList.remove('is-document');
       steps.forEach(step => step.classList.remove('is-active'));
       delete section.dataset.activeIndex;
     }

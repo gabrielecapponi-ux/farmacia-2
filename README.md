@@ -1,32 +1,28 @@
 # Farmacia 2 — Ponte Dattaro
 
-Versione 0.8.0: proposta grafica indipendente per Farmacia Ponte Dattaro, Parma.
+Versione 0.9.0: video 4K, immagini ad alta definizione e storia rivista.
 
-[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.8.0)
+[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.9.0)
 
-## Apertura e contatti
+## Qualità delle immagini
 
-L’interno illustrativo riempie lo schermo, con nome, messaggio, sede e collegamenti sovrapposti. Scorrendo si avanza verso il banco; tornando indietro si ripercorre l’ingresso. La clip dura 5 secondi alla velocità naturale, quattro volte più rapida della precedente versione 20 secondi, con un moderato avvicinamento aggiuntivo della camera. Nessun ritorno o loop. Il comando Ferma il movimento congela video e avvicinamento; Riprendi riallinea l’interno allo scroll.
+L’interno desktop è restaurato in 4K dal file originale del provider. Il telefono usa un nuovo video verticale 2160×3840, generato in 4K sullo stesso interno illustrativo, evitando il forte ritaglio del precedente film orizzontale. Lo zoom aggiuntivo è ridotto a 1,08. Lo scorrimento avanti e indietro, i testi sopra il video, il comando di pausa e i contatti fissi sono preservati.
 
-Chiama e WhatsApp rimangono fissi in basso a destra sia su desktop sia su mobile. Il menu e i collegamenti consentono di raggiungere direttamente le sezioni senza completare l’ingresso.
+Le fotografie hanno varianti AVIF/WebP a 1280, 1920, 2560 e 3840 pixel. I browser scelgono la risoluzione necessaria in base a dimensione e densità dello schermo; non viene imposta una piccola copia a uno schermo ad alta densità. Le versioni da 3840 pixel sono presenti nella build. Poster derivati dai primi fotogrammi dei video e codifica con keyframe frequenti per lo scorrimento.
 
-Movimento ridotto, risparmio dati, viewport bassa, testo ingrandito, errore video o JavaScript disattivato mantengono poster e contenuti nel flusso, senza una lunga corsa di scroll vuota. Il video non viene richiesto nei casi ridotti o con risparmio dati. Non viene intercettato lo scorrimento nativo.
+I video 4K sono la scelta predefinita. Un errore del decoder può attivare una sola alternativa FullHD; se anche questa fallisce rimane il poster. Movimento ridotto, risparmio dati, JavaScript disattivato o spazio insufficiente conservano immagine e contenuti senza un percorso vuoto. Le animazioni delle foto dei servizi durano 1,4 secondi, con un leggero avvicinamento 1,025, poi si fermano; pausa/ripresa/ripetizione restano disponibili.
 
-## Storia e servizi
+## Una storia più documentata
 
-Quattro tappe illustrate: apertura nel 1966, sede attuale dal 1988, guida del dott.Enrico Bruschi dal marzo 1999, sessantesimo 1966–2026. Su desktop la fotografia resta accanto ai testi e cambia seguendo la lettura; su mobile, con movimento ridotto o testo molto grande, ogni tappa mostra la propria immagine nel normale flusso. I testi rimangono sempre disponibili. Se una fotografia dello stage non si carica, la sezione torna alla disposizione in flusso.
+Le quattro tappe mantengono i fatti confermati: apertura nel 1966; sede attuale in Strada Montanara 23/b dal 1988; guida del dott. Enrico Bruschi dal marzo 1999; sessantesimo 1966–2026 e servizi attuali.
 
-Le quattro schede dei servizi hanno lo stesso trattamento e mostrano descrizione, scheda ufficiale e contatto specifico. Le fotografie ricevono un solo movimento breve di 1,8 secondi, poi si fermano. I comandi delle immagini consentono pausa, ripresa e ripetizione; focus, tocco, uscita dalla viewport e scheda nascosta sospendono i movimenti. Restano FAQ e galleria touch/tastiera.
+La facciata usa una fotografia pubblicata dalla farmacia nel 2016, restaurata digitalmente e mostrata intera. La data è sempre dichiarata: non è una fotografia del 1988 o una prova dell’aspetto attuale. Le altre tre scene sono composizioni illustrative IA su oggetti del lavoro in farmacia, ascolto e strumenti attuali; non sono foto d’archivio o ritratti del personale. La storia conserva i cambi di fotografia allo scroll sul desktop e tutte le immagini nel flusso su mobile, movimento ridotto o testo ingrandito.
 
-## Dati e immagini
+Il restauro aumenta la risoluzione di materiali esistenti e non li rende riprese native 4K. Il nuovo film verticale e i tre nuovi visual sono generazioni in 4K. Le dichiarazioni distinguono media illustrativi e fotografia documentale restaurata.
 
-Il JSON-LD Pharmacy è invariato: soltanto dati confermati e quattro servizi in hasOfferCatalog, con nomi, descrizioni, provider e collegamenti coerenti con il contenuto. Nessun orario, prezzo, disponibilità, recensione o immagine IA attribuita all’ente. Il concept rimane noindex,nofollow e separato dal sito ufficiale.
+## Dati e avvio
 
-Video e fotografie sono scene illustrative IA già disponibili nel progetto originale, non riprese autentiche della farmacia o del personale. Le scene storiche non sono fotografie d’archivio. Il video deriva dalla precedente generazione Higgsfield Kling3.0; le animazioni dell’interfaccia sono eseguite nel browser. Nessuna nuova generazione o dipendenza frontend.
-
-## Avvio
-
-Richiede Node.js, senza dipendenze da installare.
+Il JSON-LD Pharmacy resta invariato, con soli dati confermati e quattro servizi coerenti con le schede. Nessun orario, prezzo, disponibilità, recensione o media illustrativo attribuito all’ente. Il concept resta noindex,nofollow e separato dal sito ufficiale.
 
 ```sh
 npm run dev
@@ -35,10 +31,10 @@ npm run preview
 npm run test:schema
 ```
 
-La build contiene 66 file, inclusi formati e risoluzioni alternativi. Il totale della confezione non è il trasferimento di una visita. Main conserva i sorgenti; GitHub Pages pubblica gh-pages. Aggiornare soltanto main non pubblica il sito.
+Nessuna dipendenza frontend da installare. Main conserva i sorgenti; GitHub Pages pubblica gh-pages. La build distribuisce varianti alternative: il peso totale dei file non equivale al trasferimento di una visita.
 
 ## Fonti e crediti
 
-[Fonti dei dati e dei servizi](DATA-SOURCES.md). DM Sans usa SIL Open Font License 1.1, conservata in assets/fonts/. Il marchio è parte del concept, non il logo ufficiale della farmacia.
+[Dati e servizi](DATA-SOURCES.md). Fonte della foto documentale: [pubblicazione della farmacia nel 2016](https://www.facebook.com/photo/?fbid=185486178484941&set=a.512137567582225). Il video precedente proviene da Higgsfield Kling 3.0, il restauro usa ByteDance Upscale, i nuovi visual GPT Image 2.6 e il film verticale Seedance 2.0. Le animazioni delle interfacce sono eseguite nel browser.
 
-Il prototipo non raccoglie dati e non conferma prenotazioni; i contatti aprono i canali reali. Questo repository non concede diritti di riutilizzo del concept per altri clienti. Le versioni precedenti restano nella cronologia Git.
+DM Sans usa SIL Open Font License 1.1, conservata in assets/fonts/. Il marchio è del concept, non il logo ufficiale. Il prototipo non raccoglie dati e non conferma prenotazioni; i collegamenti aprono i canali reali. Questo repository non concede diritti di riutilizzo del concept per altri clienti. Le versioni precedenti restano nella cronologia Git.
