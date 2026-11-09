@@ -1,48 +1,44 @@
 # Farmacia 2 — Ponte Dattaro
 
-Versione 0.7.1: proposta grafica indipendente per Farmacia Ponte Dattaro, Parma.
+Versione 0.8.0: proposta grafica indipendente per Farmacia Ponte Dattaro, Parma.
 
-[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.7.1)
+[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.8.0)
 
-## Accesso ai servizi
+## Apertura e contatti
 
-Un indice presente anche su mobile porta alle quattro schede. Ogni servizio mostra subito descrizione, scheda ufficiale e contatto specifico; le informazioni prima dell’accesso restano nei pannelli espandibili. Testi più leggibili e spaziature più compatte rendono più semplice la consultazione su telefono e desktop. I pannelli hanno una breve transizione di altezza nei browser compatibili, con apertura nativa negli altri e rispetto del movimento ridotto.
+L’interno illustrativo riempie lo schermo, con nome, messaggio, sede e collegamenti sovrapposti. Scorrendo si avanza verso il banco; tornando indietro si ripercorre l’ingresso. La clip dura 5 secondi alla velocità naturale, quattro volte più rapida della precedente versione 20 secondi, con un moderato avvicinamento aggiuntivo della camera. Nessun ritorno o loop. Il comando Ferma il movimento congela video e avvicinamento; Riprendi riallinea l’interno allo scroll.
 
-## Immagini e interazioni
+Chiama e WhatsApp rimangono fissi in basso a destra sia su desktop sia su mobile. Il menu e i collegamenti consentono di raggiungere direttamente le sezioni senza completare l’ingresso.
 
-Tutte le nove fotografie di contenuto hanno un movimento leggero di camera (pan e zoom), visibile senza hover. Il movimento si attiva soltanto sulle foto in vista. Due comandi sincronizzati permettono di fermare o riavviare le immagini. Focus, tocco, uscita dalla viewport e scheda nascosta sospendono il movimento; reduced-motion e risparmio dati lo disattivano. Nessun nuovo file immagine o video richiesto per animare le foto.
+Movimento ridotto, risparmio dati, viewport bassa, testo ingrandito, errore video o JavaScript disattivato mantengono poster e contenuti nel flusso, senza una lunga corsa di scroll vuota. Il video non viene richiesto nei casi ridotti o con risparmio dati. Non viene intercettato lo scorrimento nativo.
 
-L’apertura usa la vista ampia e luminosa dell’interno già presente nel primo sito: un passaggio lento di 20 secondi verso il banco, rallentato quattro volte, con la stessa inquadratura completa su mobile e desktop. Riproduzione nativa silenziosa a pagina ferma, pausa/ripresa e replay; al termine resta l’ultimo fotogramma. Nessun capitolo o avanzamento legato allo scroll.
+## Storia e servizi
 
-Poster statico con movimento ridotto, risparmio dati, JavaScript disattivato, errore o autoplay negato. La pagina scorre normalmente e il video si ferma fuori vista o con scheda nascosta. Restano i quattro servizi fotografici equivalenti, i contatti specifici, le FAQ e la galleria touch/tastiera. AVIF preferiti con WebP di fallback, un solo font locale e nessuna dipendenza frontend.
+Quattro tappe illustrate: apertura nel 1966, sede attuale dal 1988, guida del dott.Enrico Bruschi dal marzo 1999, sessantesimo 1966–2026. Su desktop la fotografia resta accanto ai testi e cambia seguendo la lettura; su mobile, con movimento ridotto o testo molto grande, ogni tappa mostra la propria immagine nel normale flusso. I testi rimangono sempre disponibili. Se una fotografia dello stage non si carica, la sezione torna alla disposizione in flusso.
 
-Video e fotografie sono scene illustrative IA, non riprese autentiche degli ambienti o del personale. La scena in bianco e nero non è una fotografia d’archivio.
+Le quattro schede dei servizi hanno lo stesso trattamento e mostrano descrizione, scheda ufficiale e contatto specifico. Le fotografie ricevono un solo movimento breve di 1,8 secondi, poi si fermano. I comandi delle immagini consentono pausa, ripresa e ripetizione; focus, tocco, uscita dalla viewport e scheda nascosta sospendono i movimenti. Restano FAQ e galleria touch/tastiera.
 
-## Dati strutturati
+## Dati e immagini
 
-Il JSON-LD Pharmacy conserva esclusivamente i dati confermati e hasOfferCatalog con quattro Service: ECG, teledermatologia, Holter pressorio e Holter cardiaco. Nomi, descrizioni, provider e URL ufficiali corrispondono alle schede visibili.
+Il JSON-LD Pharmacy è invariato: soltanto dati confermati e quattro servizi in hasOfferCatalog, con nomi, descrizioni, provider e collegamenti coerenti con il contenuto. Nessun orario, prezzo, disponibilità, recensione o immagine IA attribuita all’ente. Il concept rimane noindex,nofollow e separato dal sito ufficiale.
 
-Il validatore controlla anche i collegamenti dei contatti e i messaggi WhatsApp specifici. Nessun prezzo, disponibilità, orario, rating, foto IA o logo del concept aggiunto al markup. Non viene aggiunto FAQPage. Il concept resta noindex,nofollow e separato dal sito ufficiale.
-
-Il controllo del 9 novembre 2026 dopo la nuova apertura conferma la coerenza dei dati e dei quattro servizi: nessuna modifica al JSON-LD necessaria. Video e immagini illustrativi restano separati dall’identità della farmacia.
+Video e fotografie sono scene illustrative IA già disponibili nel progetto originale, non riprese autentiche della farmacia o del personale. Le scene storiche non sono fotografie d’archivio. Il video deriva dalla precedente generazione Higgsfield Kling3.0; le animazioni dell’interfaccia sono eseguite nel browser. Nessuna nuova generazione o dipendenza frontend.
 
 ## Avvio
 
 Richiede Node.js, senza dipendenze da installare.
 
 ```sh
-npm run dev       # http://127.0.0.1:4421/
-npm run build     # verifica JSON-LD e genera dist/
-npm run preview   # http://127.0.0.1:4422/
+npm run dev
+npm run build
+npm run preview
 npm run test:schema
 ```
 
-La build contiene 47 file, inclusi formati e risoluzioni alternativi. La somma della confezione non equivale al trasferimento di ogni visita. I sorgenti sono su main; GitHub Pages pubblica gh-pages. Aggiornare main da solo non pubblica la nuova build.
+La build contiene 66 file, inclusi formati e risoluzioni alternativi. Il totale della confezione non è il trasferimento di una visita. Main conserva i sorgenti; GitHub Pages pubblica gh-pages. Aggiornare soltanto main non pubblica il sito.
 
 ## Fonti e crediti
 
-[Fonti dei dati e dei servizi](DATA-SOURCES.md). “1966–2026 ·60 anni a Parma” si riferisce al2026; la sede attuale risale al1988.
+[Fonti dei dati e dei servizi](DATA-SOURCES.md). DM Sans usa SIL Open Font License 1.1, conservata in assets/fonts/. Il marchio è parte del concept, non il logo ufficiale della farmacia.
 
-DM Sans usa SIL Open Font License1.1, conservata in assets/fonts/. Il piccolo marchio è parte del concept, non un logo ufficiale. Il film dell’interno, già presente nel primo sito, è generato con Higgsfield Kling3.0 e rallentato quattro volte; l’animazione delle fotografie viene eseguita nel browser con Web Animations API.
-
-Il prototipo non raccoglie dati e non conferma prenotazioni; i contatti aprono i canali reali. I materiali non costituiscono un pacchetto di asset per altri clienti e questo repository non concede diritti di riutilizzo del concept. Le versioni precedenti rimangono nella cronologia Git.
+Il prototipo non raccoglie dati e non conferma prenotazioni; i contatti aprono i canali reali. Questo repository non concede diritti di riutilizzo del concept per altri clienti. Le versioni precedenti restano nella cronologia Git.
