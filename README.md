@@ -1,8 +1,12 @@
 # Farmacia 2 — Ponte Dattaro
 
-Versione 0.7.0: proposta grafica indipendente per Farmacia Ponte Dattaro, Parma.
+Versione 0.7.1: proposta grafica indipendente per Farmacia Ponte Dattaro, Parma.
 
-[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.7.0)
+[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.7.1)
+
+## Accesso ai servizi
+
+Un indice presente anche su mobile porta alle quattro schede. Ogni servizio mostra subito descrizione, scheda ufficiale e contatto specifico; le informazioni prima dell’accesso restano nei pannelli espandibili. Testi più leggibili e spaziature più compatte rendono più semplice la consultazione su telefono e desktop. I pannelli hanno una breve transizione di altezza nei browser compatibili, con apertura nativa negli altri e rispetto del movimento ridotto.
 
 ## Immagini e interazioni
 
@@ -16,9 +20,11 @@ Video e fotografie sono scene illustrative IA, non riprese autentiche degli ambi
 
 ## Dati strutturati
 
-Il JSON-LD Pharmacy conserva esclusivamente i dati confermati e aggiunge hasOfferCatalog con quattro Service: ECG, teledermatologia, Holter pressorio e Holter cardiaco. Nomi, descrizioni, provider e URL ufficiali corrispondono alle schede visibili.
+Il JSON-LD Pharmacy conserva esclusivamente i dati confermati e hasOfferCatalog con quattro Service: ECG, teledermatologia, Holter pressorio e Holter cardiaco. Nomi, descrizioni, provider e URL ufficiali corrispondono alle schede visibili.
 
 Il validatore controlla anche i collegamenti dei contatti e i messaggi WhatsApp specifici. Nessun prezzo, disponibilità, orario, rating, foto IA o logo del concept aggiunto al markup. Non viene aggiunto FAQPage. Il concept resta noindex,nofollow e separato dal sito ufficiale.
+
+Il controllo del 9 novembre 2026 dopo la nuova apertura conferma la coerenza dei dati e dei quattro servizi: nessuna modifica al JSON-LD necessaria. Video e immagini illustrativi restano separati dall’identità della farmacia.
 
 ## Avvio
 

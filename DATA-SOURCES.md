@@ -1,6 +1,6 @@
 # Dati e servizi
 
-Confermati nelle fonti ufficiali, rilette il 6 novembre 2026:
+Confermati nelle fonti ufficiali, rilette il 9 novembre 2026:
 
 - Farmacia Ponte Dattaro, Strada Montanara23/b,43124 Parma(PR), Italia.
 - Telefono+39 0521 964011, email pontedattarofarmacia@gmail.com, P.IVA02072810340.
