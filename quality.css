@@ -6,3 +6,10 @@
 .contact-image>span{position:relative;left:auto;bottom:auto;align-self:start;margin-top:18px;background:transparent;color:#3c5748;padding:0;font-size:12px;line-height:1.6;max-width:32em}
 .gallery-caption p{max-width:500px}
 @media(max-width:820px){.contact-image{min-height:0;padding:40px 20px}.contact-image>span{margin-top:12px}.contact-image picture{border-width:6px}}
+
+/* Keep the shelves and counter prominent in the portrait composition. */
+@media(max-width:820px){.entry-camera .film-poster>img,.entry-camera .hero-video{transform:scale(1.2);transform-origin:50% 80%}.entry-shade{background:linear-gradient(0deg,#082b23e6 0%,#082b23b0 28%,#082b2330 50%,transparent 69%)}.entry-copy{filter:none;text-shadow:0 1px 7px #082b2366}.entry-actions .button{text-shadow:none}}
+
+@media(max-width:820px){.entry-description-extra{display:none}}
+@media(max-width:359px){.hero-cta-lead{display:none}.entry-actions .button>span{text-transform:capitalize}}
+@media(max-width:820px) and (max-height:740px){.entry-sticky{grid-template-rows:minmax(100px,1fr) auto auto auto}}

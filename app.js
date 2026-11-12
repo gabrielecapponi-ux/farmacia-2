@@ -1,4 +1,4 @@
-import { initHistory } from './history.js?v=0.9.0';
+import { initHistory } from './history.js?v=0.9.2';
 const root = document.documentElement;
 const preference = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 820px)');
@@ -170,10 +170,17 @@ function measureLayout() {
   setPixelProperty(root, '--dock-space', dock?.getBoundingClientRect().height || 0);
   if (stage && entryCopy) {
     const vh = window.innerHeight;
-    const style = getComputedStyle(entryCopy);
-    const contentHeight = entryCopy.getBoundingClientRect().height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+    const sticky = stage.querySelector('[data-film-sticky]');
+    const style = getComputedStyle(sticky);
+    const contentHeight = entryCopy.getBoundingClientRect().height;
+    const bottomHeight = stage.querySelector('.entry-bottom')?.getBoundingClientRect().height || 0;
+    const toolsHeight = stage.querySelector('.entry-tools')?.getBoundingClientRect().height || 0;
+    const gaps = (parseFloat(style.rowGap) || 0) * 3;
+    const padding = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
+    const imageReserve = matchMedia('(max-width:820px) and (max-height:740px)').matches ? 100 : 150;
+    const needed = contentHeight + bottomHeight + toolsHeight + gaps + padding + imageReserve;
     const nextCompact = !allowed() || failed || !('IntersectionObserver' in window)
-      || vh < 650 || headerHeight + contentHeight + 235 > vh;
+      || vh < 650 || needed > vh;
     const changed = nextCompact !== compact;
     compact = nextCompact;
     stage.classList.toggle('is-entry-scroll', !compact);
@@ -264,6 +271,7 @@ if (stage && video) {
     const observer = new IntersectionObserver(entries => {
       nearFilm = entries[0].isIntersecting;
       if (nearFilm) { loadFilm(); syncFilm(); }
+      else unloadFilm();
     }, { rootMargin: '200px 0px' });
     observer.observe(stage);
   }
