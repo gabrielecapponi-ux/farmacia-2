@@ -7,7 +7,8 @@ const root = await realpath(fileURLToPath(new URL('../', import.meta.url)));
 const dist = path.join(root, 'dist');
 const pictureKeys = [
   'ecg', 'pelle', 'pressione', 'cuore', 'prodotti', 'botanica', 'interno',
-  'sede-2016', 'storia-1966', 'storia-1999', 'storia-2026',
+  'sede-2016', 'storia-1966',
+  'racconto-1966', 'racconto-1988', 'racconto-1999', 'racconto-2026',
 ];
 const files = [
   'index.html', 'styles.css', 'app.js', 'immersive.css', 'history.css', 'history.js', 'quality.css', 'robots.txt',
