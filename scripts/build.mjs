@@ -11,8 +11,9 @@ const pictureKeys = [
   'racconto-1966', 'racconto-1988', 'racconto-1999', 'racconto-2026',
 ];
 const files = [
-  'index.html', 'styles.css', 'app.js', 'immersive.css', 'history.css', 'history.js', 'quality.css', 'robots.txt',
-  'assets/mark.svg', 'assets/fonts/dm-sans.woff2', 'assets/fonts/dm-sans-LICENSE.txt',
+  'index.html', 'styles.css', 'app.js', 'immersive.css', 'history.css', 'history.js', 'story-playback.js', 'quality.css', 'robots.txt',
+  ...['1966', '1988', '1999', '2026'].flatMap(year => ['720', '1080', '4k'].map(quality => `assets/story-motion/storia-${year}-${quality}.mp4`)),
+  'assets/mark.svg', 'assets/fonts/dm-sans.woff2', 'assets/fonts/dm-sans-LICENSE.txt', 'assets/fonts/sora-latin-variable.woff2', 'assets/fonts/SORA-OFL.txt',
   ...pictureKeys.flatMap(key => [1280, 1920, 2560, 3840].flatMap(width =>
     ['avif', 'webp'].map(format => `assets/quality/${key}-${width}.${format}`))),
   ...['desktop', 'mobile'].flatMap(view => ['1080', '4k'].flatMap(quality =>

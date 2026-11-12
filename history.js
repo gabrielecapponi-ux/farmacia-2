@@ -1,3 +1,4 @@
+import { initStoryPlayback } from './story-playback.js?v=0.9.2';
 // Scroll changes the visual; dates and photographic provenance remain ordinary HTML.
 // No continuous render loop, wheel interception or scroll locking is used.
 export function initHistory({ reducedMotion, connection } = {}) {
@@ -11,9 +12,6 @@ export function initHistory({ reducedMotion, connection } = {}) {
   const isReduced = () => typeof reducedMotion === 'function' ? reducedMotion() : typeof reducedMotion === 'boolean' ? reducedMotion : query.matches;
   const isSaving = () => Boolean(network?.saveData || /(^|-)2g$/.test(network?.effectiveType || ''));
   const disposers = [];
-  const animations = new Set();
-  const animatedPhotos = new WeakSet();
-  const visiblePhotos = new Set();
   const stage = document.createElement('div');
   stage.className = 'story-stage';
   stage.dataset.historyStage = '';
@@ -63,20 +61,8 @@ export function initHistory({ reducedMotion, connection } = {}) {
     target?.addEventListener?.(event, handler, options);
     disposers.push(() => target?.removeEventListener?.(event, handler, options));
   };
-  const stopAnimations = () => {
-    animations.forEach(animation => animation.cancel());
-    animations.clear();
-  };
+  let playback;
   const mayAnimate = () => !destroyed && !paused && !interactiveFocus && !isReduced() && !isSaving() && !document.hidden;
-  const animatePhoto = image => {
-    if (!image?.complete || !image.naturalWidth || !mayAnimate() || !image.animate) return;
-    // The source photograph is presented in full. Do not zoom into a document
-    // or crop its edges while describing its historical provenance.
-    if (image.closest('[data-history-kind="document"], .is-document')) return;
-    const animation = image.animate([{ transform: 'scale(1.035)' }, { transform: 'scale(1)' }], { duration: 1800, easing: 'cubic-bezier(.22,1,.36,1)' });
-    animations.add(animation);
-    animation.finished.then(() => animations.delete(animation), () => animations.delete(animation));
-  };
   const hydrate = index => {
     const frame = frames[index];
     if (!frame) return;
@@ -100,10 +86,7 @@ export function initHistory({ reducedMotion, connection } = {}) {
       || (documentPhoto ? 'Foto pubblicata nel 2016 · restauro digitale' : 'Visual illustrativo IA');
     frames.forEach((frame, i) => frame.classList.toggle('is-active', i === index));
     steps.forEach((step, i) => step.classList.toggle('is-active', i === index));
-    if (changed) {
-      stopAnimations();
-      animatePhoto(frames[index].querySelector('img'));
-    }
+    if (changed) playback?.refresh();
     // Decode one upcoming scene while the visitor reads the present chapter.
     if (near && !isSaving()) hydrate(index + 1);
   };
@@ -157,13 +140,14 @@ export function initHistory({ reducedMotion, connection } = {}) {
       request += 1;
       requested = -1;
       active = -1;
-      stopAnimations();
+      playback?.refresh();
       frames.forEach(frame => frame.classList.remove('is-active'));
       stage.classList.remove('is-document');
       steps.forEach(step => step.classList.remove('is-active'));
       delete section.dataset.activeIndex;
     }
     dirty = true;
+    playback?.refresh();
     schedule();
   };
   frames.forEach(frame => on(frame.querySelector('img'), 'error', () => {
@@ -175,37 +159,11 @@ export function initHistory({ reducedMotion, connection } = {}) {
     const observer = new IntersectionObserver(entries => {
       near = entries[0].isIntersecting;
       if (near) schedule();
-      else stopAnimations();
+      else playback?.refresh();
     }, { rootMargin: '180px 0px' });
     observer.observe(section);
     disposers.push(() => observer.disconnect());
-    const photoObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        const figure = entry.target;
-        if (entry.isIntersecting) {
-          visiblePhotos.add(figure);
-          if (!enhanced && !animatedPhotos.has(figure) && mayAnimate()) {
-            const image = figure.querySelector('img');
-            if (image.complete && image.naturalWidth) {
-              animatedPhotos.add(figure);
-              animatePhoto(image);
-            }
-          }
-        } else visiblePhotos.delete(figure);
-      });
-    }, { threshold: .12 });
-    section.querySelectorAll('[data-history-image]').forEach(figure => {
-      photoObserver.observe(figure);
-      on(figure.querySelector('img'), 'load', () => {
-        dirty = true;
-        schedule();
-        if (!enhanced && visiblePhotos.has(figure) && !animatedPhotos.has(figure) && mayAnimate()) {
-          animatedPhotos.add(figure);
-          animatePhoto(figure.querySelector('img'));
-        }
-      });
-    });
-    disposers.push(() => photoObserver.disconnect());
+
   }
   on(window, 'scroll', schedule, { passive: true });
   on(window, 'resize', configure, { passive: true });
@@ -213,16 +171,17 @@ export function initHistory({ reducedMotion, connection } = {}) {
   on(wide, 'change', configure);
   on(network, 'change', configure);
   on(section, 'focusin', event => {
-    interactiveFocus = event.target.matches('a,button,summary,input,select,textarea,[tabindex="0"]');
-    stopAnimations();
+    interactiveFocus = !event.target.closest('[data-history-playback]') && event.target.matches('a,button,summary,input,select,textarea,[tabindex="0"]');
+    playback?.refresh();
     section.classList.toggle('is-history-still', !mayAnimate());
   });
   on(section, 'focusout', event => {
-    interactiveFocus = Boolean(section.contains(event.relatedTarget) && event.relatedTarget?.matches('a,button,summary,input,select,textarea,[tabindex="0"]'));
+    interactiveFocus = Boolean(section.contains(event.relatedTarget) && !event.relatedTarget?.closest('[data-history-playback]') && event.relatedTarget?.matches('a,button,summary,input,select,textarea,[tabindex="0"]'));
     section.classList.toggle('is-history-still', !mayAnimate());
+    playback?.refresh();
   });
   on(document, 'visibilitychange', () => {
-    if (document.hidden) stopAnimations();
+    playback?.refresh();
     section.classList.toggle('is-history-still', !mayAnimate());
     schedule();
   });
@@ -233,12 +192,14 @@ export function initHistory({ reducedMotion, connection } = {}) {
     steps.forEach(step => resizeObserver.observe(step.querySelector('.story-copy')));
     disposers.push(() => resizeObserver.disconnect());
   }
+  playback = initStoryPlayback({ section, steps, frames,
+    isEnhanced: () => enhanced, activeIndex: () => active, canPlay: mayAnimate });
   document.fonts?.ready.then(configure);
   configure();
   return {
     setPaused(value) {
       paused = Boolean(value);
-      if (paused) stopAnimations();
+      playback?.refresh();
       section.classList.toggle('is-history-still', !mayAnimate());
     },
     refresh() { configure(); },
@@ -248,7 +209,7 @@ export function initHistory({ reducedMotion, connection } = {}) {
       near = false;
       request += 1;
       if (raf) cancelAnimationFrame(raf);
-      stopAnimations();
+      playback?.destroy();
       disposers.forEach(dispose => dispose());
       stage.remove();
       section.classList.remove('is-history-enhanced', 'is-history-still');

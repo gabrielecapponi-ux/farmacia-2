@@ -1,8 +1,8 @@
 # Farmacia 2 — Ponte Dattaro
 
-Versione 0.9.1: nuova storia evocativa ispirata a Farmacia Ponte Dattaro, con quattro scene coordinate e movimento leggero.
+Versione0.9.2: persone che camminano nelle quattro tappe della storia, apertura più luminosa e interfaccia mobile rifinita.
 
-[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.9.1)
+[Apri il sito](https://gabrielecapponi-ux.github.io/farmacia-2/?v=0.9.2)
 
 ## Qualità delle immagini
 
@@ -16,13 +16,17 @@ I video 4K sono la scelta predefinita. Un errore del decoder può attivare una s
 
 ## Una passeggiata nella storia
 
-Le quattro tappe mantengono i fatti confermati: apertura nel 1966; sede attuale in Strada Montanara 23/b dal 1988; guida del dott. Enrico Bruschi dal marzo 1999; sessantesimo 1966–2026 e servizi attuali.
+Le quattro tappe mantengono i fatti confermati: apertura nel1966; sede attuale in Strada Montanara23/b dal1988; guida del dott.Enrico Bruschi dal marzo1999; sessantesimo1966–2026 e servizi attuali.
 
-Quattro scene evocative di strada, luce e persone anonime accompagnano le epoche. Riprendono la serie illustrativa del progetto Farmacia Ponte Dattaro. Sono ricostruzioni IA, non fotografie d’archivio o prove dell’aspetto delle sedi; nessun passante identifica il personale della farmacia. Didascalie e descrizioni alternative lo dichiarano. I cambi di immagine allo scroll e il movimento leggero restano sul desktop; mobile, movimento ridotto, JavaScript disattivato e testo grande conservano tutte le immagini nel flusso.
+Quattro scene evocative della serie del progetto Farmacia Ponte Dattaro mostrano passanti anonimi che camminano realmente. Sono ricostruzioni illustrative IA, non fotografie d’archivio, prove delle sedi o ritratti del personale. I master già restaurati con Higgsfield sono riutilizzati senza nuova generazione/spesa. Le clip durano2,5secondi, senza audio, loop, reverse o zoom aggiunto. La persona cammina una volta, poi resta il fotogramma finale; si può rivedere la scena.
 
-Le immagini derivano dai primi fotogrammi dei master già restaurati con Higgsfield, 3832×2160. Le consegne fino a 3840×2160 sono ricampionate: non fotografie native 4K. AVIF/WebP a quattro risoluzioni evitano di scaricare il file più grande quando non serve. Nessuna nuova generazione per questa revisione.
+Un solo lettore video segue la tappa visibile. Qualità720p/1080p/4K secondo dimensione e densità, circa0,64/1,25/3,2MB per scena; mai tutte insieme. Fuori schermo il filmato viene rilasciato. Pausa, focus sui collegamenti, scheda nascosta, movimento ridotto, risparmio dati, JavaScript disattivato ed errori conservano le fotografie. Il video iniziale viene anch’esso rilasciato quando si passa alla storia.
 
-La fotografia documentale pubblicata nel 2016, restaurata digitalmente e datata, rimane nei contatti. Il video iniziale e le immagini dei servizi sono conservati.
+Le fotografie mantengono quattro risoluzioni fino a3840×2160. I master restaurati di partenza sono3832×2160: la consegna4K è ricampionata, non fotografia nativa4K. La fotografia documentale pubblicata nel2016 rimane nei contatti, con data dichiarata.
+
+## Apertura e telefono
+
+Immagine dell’interno più luminosa, con velatura confinata alla zona dei testi. Il ritaglio verticale mette più in evidenza banco e scaffali. Nuovo carattere locale Sora sul mobile, logo e menu separati, icone e frecce coerenti, pulsanti compatti. Titolo, indirizzo e pausa occupano righe distinte; le viewport basse e il testo ingrandito usano una composizione estesa nel flusso. Gli indirizzi dell’apertura e dei contatti aprono le indicazioni su Google Maps. Chiama e WhatsApp restano fissi.
 
 ## Dati e avvio
 
@@ -41,4 +45,4 @@ Nessuna dipendenza frontend da installare. Main conserva i sorgenti; GitHub Page
 
 [Dati e servizi](DATA-SOURCES.md). Fonte della foto documentale: [pubblicazione della farmacia nel 2016](https://www.facebook.com/photo/?fbid=185486178484941&set=a.512137567582225). Il video precedente proviene da Higgsfield Kling 3.0, il restauro usa ByteDance Upscale, i visual editoriali GPT Image 2.6 e il film verticale Seedance 2.0. La nuova storia riusa immagini OpenAI animate con Higgsfield Kling 3.0 e restaurate con ByteDance Upscale. Le animazioni delle interfacce sono eseguite nel browser.
 
-DM Sans usa SIL Open Font License 1.1, conservata in assets/fonts/. Il marchio è del concept, non il logo ufficiale. Il prototipo non raccoglie dati e non conferma prenotazioni; i collegamenti aprono i canali reali. Questo repository non concede diritti di riutilizzo del concept per altri clienti. Le versioni precedenti restano nella cronologia Git.
+DM Sans e Sora usano SIL Open Font License 1.1; licenze conservate in assets/fonts/. Il marchio è del concept, non il logo ufficiale. Il prototipo non raccoglie dati e non conferma prenotazioni; i collegamenti aprono i canali reali. Questo repository non concede diritti di riutilizzo del concept per altri clienti. Le versioni precedenti restano nella cronologia Git.
